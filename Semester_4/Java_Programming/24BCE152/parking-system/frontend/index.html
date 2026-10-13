@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartPark — Intelligent Parking Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #11141b;
+    --surface2: #181c26;
+    --border: #1f2535;
+    --border2: #2a3248;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --text2: #8892a4;
+    --text3: #4a5568;
+    --glow: 0 0 20px rgba(0,212,255,0.15);
+    --glow2: 0 0 30px rgba(124,58,237,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ========== HEADER ========== */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,12,16,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.3rem;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .logo span { color: var(--accent); }
+
+  .header-stats {
+    display: flex; gap: 2rem; align-items: center;
+  }
+  .hstat {
+    display: flex; flex-direction: column; align-items: center;
+    font-size: 0.7rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .hstat strong {
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem; color: var(--text);
+    margin-bottom: 1px;
+  }
+  .hstat.accent strong { color: var(--accent); }
+  .hstat.warn strong { color: var(--warn); }
+  .hstat.green strong { color: var(--accent3); }
+
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.72rem; color: var(--accent3);
+    font-family: 'DM Mono', monospace;
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent3);
+    animation: pulse 1.5s ease infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ========== LAYOUT ========== */
+  .app {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: calc(100vh - 64px);
+    position: relative; z-index: 1;
+  }
+
+  /* ========== SIDEBAR ========== */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 0;
+    display: flex; flex-direction: column;
+  }
+
+  .nav-section {
+    padding: 0.5rem 1rem 0.25rem;
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--text3); font-weight: 600;
+    margin-top: 0.5rem;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 0.65rem 1.5rem;
+    cursor: pointer; transition: all 0.2s;
+    font-size: 0.88rem; color: var(--text2);
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .nav-item.active {
+    color: var(--accent);
+    background: rgba(0,212,255,0.06);
+    border-left-color: var(--accent);
+  }
+  .nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent2);
+    color: white; font-size: 0.65rem;
+    padding: 1px 7px; border-radius: 20px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .sidebar-footer {
+    margin-top: auto; padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .revenue-card {
+    background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(0,212,255,0.08));
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 10px; padding: 1rem;
+  }
+  .revenue-label { font-size: 0.7rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; }
+  .revenue-amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem; font-weight: 800;
+    color: var(--accent3); margin-top: 4px;
+  }
+  .revenue-today { font-size: 0.72rem; color: var(--text3); margin-top: 2px; }
+
+  /* ========== MAIN CONTENT ========== */
+  .main {
+    padding: 2rem;
+    overflow-y: auto;
+  }
+
+  .page { display: none; animation: fadeIn 0.3s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .page-header {
+    margin-bottom: 1.5rem;
+  }
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem; font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .page-sub { font-size: 0.85rem; color: var(--text2); }
+
+  /* ========== CARDS ========== */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
+    margin-bottom: 1.2rem;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--text);
+  }
+  .card-title .ct-icon {
+    width: 28px; height: 28px;
+    background: rgba(0,212,255,0.1);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+  }
+
+  /* ========== DASHBOARD GRID ========== */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border2); box-shadow: var(--glow); }
+  .stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  }
+  .stat-card.blue::before { background: linear-gradient(90deg, var(--accent), transparent); }
+  .stat-card.purple::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+  .stat-card.green::before { background: linear-gradient(90deg, var(--accent3), transparent); }
+  .stat-card.warn::before { background: linear-gradient(90deg, var(--warn), transparent); }
+
+  .stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text2); margin-bottom: 6px; }
+  .stat-value {
+    font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+    line-height: 1;
+  }
+  .stat-value.blue { color: var(--accent); }
+  .stat-value.purple { color: var(--accent2); }
+  .stat-value.green { color: var(--accent3); }
+  .stat-value.warn { color: var(--warn); }
+  .stat-sub { font-size: 0.72rem; color: var(--text3); margin-top: 6px; }
+  .stat-icon {
+    position: absolute; bottom: 10px; right: 14px;
+    font-size: 2.5rem; opacity: 0.06;
+  }
+
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  /* ========== PARKING MAP ========== */
+  .floor-tabs {
+    display: flex; gap: 0.5rem; margin-bottom: 1rem;
+  }
+  .floor-tab {
+    padding: 0.35rem 1rem;
+    border: 1px solid var(--border2);
+    border-radius: 6px; cursor: pointer;
+    font-size: 0.8rem; color: var(--text2);
+    transition: all 0.2s;
+    font-family: 'DM Mono', monospace;
+  }
+  .floor-tab.active, .floor-tab:hover {
+    background: rgba(0,212,255,0.1);
+    border-color: var(--accent); color: var(--accent);
+  }
+
+  .slot-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 5px;
+    margin-bottom: 0.75rem;
+  }
+
+  .slot {
+    aspect-ratio: 1;
+    border-radius: 5px;
+    border: 1px solid;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 0.45rem;
+    cursor: default;
+    position: relative;
+    transition: transform 0.15s;
+  }
+  .slot:hover { transform: scale(1.1); z-index: 2; }
+  .slot .slot-id { font-family: 'DM Mono', monospace; font-size: 0.42rem; }
+  .slot .slot-icon { font-size: 0.75rem; margin-bottom: 1px; }
+
+  .slot.available { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.25); color: var(--accent3); }
+  .slot.occupied { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #ef4444; }
+  .slot.ev { background: rgba(0,212,255,0.08); border-color: rgba(0,212,255,0.3); color: var(--accent); }
+  .slot.handicapped { background: rgba(124,58,237,0.1); border-color: rgba(124,58,237,0.3); color: var(--accent2); }
+  .slot.maintenance { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.25); color: var(--warn); }
+
+  .legend {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    font-size: 0.72rem; color: var(--text2);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+  /* ========== FORMS ========== */
+  .form-grid {
+    display: grid; gap: 1rem;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label {
+    font-size: 0.75rem; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--text2);
+    font-weight: 500;
+  }
+  .form-input, .form-select {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    color: var(--text); font-size: 0.88rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+  .form-input:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
+  }
+  .form-select option { background: var(--surface2); }
+
+  /* ========== BUTTONS ========== */
+  .btn {
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px; border: none;
+    font-size: 0.88rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #0a0c10;
+    box-shadow: 0 0 20px rgba(0,212,255,0.25);
+  }
+  .btn-primary:hover { background: #00b8d9; box-shadow: 0 0 30px rgba(0,212,255,0.4); transform: translateY(-1px); }
+  .btn-danger {
+    background: rgba(239,68,68,0.15);
+    color: #ef4444; border: 1px solid rgba(239,68,68,0.3);
+  }
+  .btn-danger:hover { background: rgba(239,68,68,0.25); }
+  .btn-ghost {
+    background: rgba(255,255,255,0.05);
+    color: var(--text2); border: 1px solid var(--border2);
+  }
+  .btn-ghost:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+  .btn-sm { padding: 0.4rem 0.9rem; font-size: 0.78rem; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+  /* ========== TABLE ========== */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text3); padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  td {
+    padding: 0.75rem 0.75rem;
+    font-size: 0.83rem; color: var(--text2);
+    border-bottom: 1px solid rgba(31,37,53,0.6);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 0.2rem 0.65rem; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 600;
+    font-family: 'DM Mono', monospace;
+  }
+  .badge-active { background: rgba(16,185,129,0.15); color: var(--accent3); }
+  .badge-paid { background: rgba(0,212,255,0.1); color: var(--accent); }
+  .badge-warn { background: rgba(245,158,11,0.12); color: var(--warn); }
+
+  .plate-tag {
+    font-family: 'DM Mono', monospace;
+    background: var(--surface2); border: 1px solid var(--border2);
+    padding: 0.2rem 0.6rem; border-radius: 5px;
+    font-size: 0.82rem; color: var(--text); letter-spacing: 0.05em;
+  }
+
+  /* ========== TICKET MODAL ========== */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: none; align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    width: 480px; max-width: 95vw;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+    animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes modalIn { from{transform:scale(0.9);opacity:0} to{transform:scale(1);opacity:1} }
+
+  .modal-header {
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; }
+  .modal-close {
+    width: 30px; height: 30px; border-radius: 6px;
+    background: rgba(255,255,255,0.05); border: none; cursor: pointer;
+    color: var(--text2); font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .modal-close:hover { color: var(--text); background: rgba(255,255,255,0.1); }
+
+  .modal-body { padding: 1.5rem; }
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 0.75rem; justify-content: flex-end;
+  }
+
+  /* Ticket styles */
+  .ticket-receipt {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 10px; padding: 1.25rem;
+    font-family: 'DM Mono', monospace;
+  }
+  .receipt-header {
+    text-align: center; margin-bottom: 1rem;
+    padding-bottom: 1rem; border-bottom: 1px dashed var(--border2);
+  }
+  .receipt-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: var(--accent); }
+  .receipt-sub { font-size: 0.72rem; color: var(--text3); margin-top: 2px; }
+
+  .receipt-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 0.6rem; font-size: 0.8rem;
+  }
+  .receipt-key { color: var(--text2); }
+  .receipt-val { color: var(--text); font-weight: 500; }
+  .receipt-val.big { font-size: 1.2rem; color: var(--accent3); font-weight: 700; }
+  .receipt-divider { border-top: 1px dashed var(--border2); margin: 0.75rem 0; }
+
+  /* ========== TOAST ========== */
+  #toast-container {
+    position: fixed; bottom: 1.5rem; right: 1.5rem;
+    z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .toast {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 10px; padding: 0.85rem 1.1rem;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.85rem; min-width: 260px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    animation: toastIn 0.3s ease;
+  }
+  @keyframes toastIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+  .toast.success { border-left: 3px solid var(--accent3); }
+  .toast.error { border-left: 3px solid var(--danger); }
+  .toast.info { border-left: 3px solid var(--accent); }
+  .toast-icon { font-size: 1.1rem; }
+
+  /* ========== SEARCH BAR ========== */
+  .search-bar {
+    display: flex; gap: 0.75rem; margin-bottom: 1.25rem; align-items: center;
+  }
+  .search-input-wrap {
+    position: relative; flex: 1;
+  }
+  .search-input-wrap input {
+    width: 100%; padding: 0.6rem 0.9rem 0.6rem 2.4rem;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 8px; color: var(--text); font-size: 0.88rem;
+    outline: none; transition: border-color 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .search-input-wrap input:focus { border-color: var(--accent); }
+  .search-icon {
+    position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%);
+    color: var(--text3); font-size: 0.9rem;
+  }
+
+  /* ========== LOG VIEWER ========== */
+  .log-viewer {
+    background: #060810;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    height: 400px;
+    overflow-y: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    line-height: 1.7;
+  }
+  .log-line { color: var(--text2); padding: 1px 0; }
+  .log-line.check-in { color: var(--accent3); }
+  .log-line.check-out { color: var(--accent); }
+  .log-line.error { color: var(--danger); }
+  .log-line.monitor { color: var(--text3); }
+  .log-line.system { color: var(--accent2); }
+
+  /* ========== OCCUPANCY BAR ========== */
+  .occ-bar-wrap {
+    display: flex; gap: 1rem; align-items: center; margin-bottom: 0.5rem;
+  }
+  .occ-label { font-size: 0.78rem; color: var(--text2); width: 80px; text-align: right; }
+  .occ-bar {
+    flex: 1; height: 8px; background: var(--surface2);
+    border-radius: 4px; overflow: hidden;
+  }
+  .occ-fill {
+    height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+  .occ-pct { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--text2); width: 35px; }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 1100px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .dash-grid { grid-template-columns: 1fr; }
+    .slot-grid { grid-template-columns: repeat(5, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .header-stats { display: none; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  /* ========== EMPTY STATE ========== */
+  .empty-state {
+    text-align: center; padding: 3rem 2rem;
+    color: var(--text3);
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+  .empty-text { font-size: 0.88rem; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  .type-select-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin-bottom: 1rem;
+  }
+  .type-btn {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 0.75rem 0.5rem;
+    border: 1px solid var(--border2);
+    border-radius: 8px; cursor: pointer;
+    background: var(--surface2); transition: all 0.2s;
+    font-size: 0.72rem; color: var(--text2); gap: 4px;
+  }
+  .type-btn .ticon { font-size: 1.4rem; }
+  .type-btn:hover, .type-btn.selected {
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.08);
+    color: var(--accent);
+  }
+  .rate-tag {
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    color: var(--accent3);
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🅿</div>
+    Smart<span>Park</span>
+  </div>
+  <div class="header-stats">
+    <div class="hstat accent">
+      <strong id="h-available">—</strong>
+      Available
+    </div>
+    <div class="hstat warn">
+      <strong id="h-occupied">—</strong>
+      Occupied
+    </div>
+    <div class="hstat green">
+      <strong id="h-revenue">₹0</strong>
+      Revenue
+    </div>
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      LIVE
+    </div>
+  </div>
+</header>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="nav-section">Operations</div>
+    <div class="nav-item active" onclick="nav('dashboard')">
+      <span class="icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="nav('checkin')">
+      <span class="icon">🚗</span> Check In
+    </div>
+    <div class="nav-item" onclick="nav('checkout')">
+      <span class="icon">🚪</span> Check Out
+    </div>
+    <div class="nav-item" onclick="nav('find')">
+      <span class="icon">🔍</span> Find Vehicle
+    </div>
+
+    <div class="nav-section">Monitoring</div>
+    <div class="nav-item" onclick="nav('map')">
+      <span class="icon">🗺️</span> Parking Map
+    </div>
+    <div class="nav-item" onclick="nav('active')">
+      <span class="icon">🎫</span> Active Tickets
+      <span class="nav-badge" id="active-count">0</span>
+    </div>
+    <div class="nav-item" onclick="nav('history')">
+      <span class="icon">📋</span> History
+    </div>
+
+    <div class="nav-section">System</div>
+    <div class="nav-item" onclick="nav('logs')">
+      <span class="icon">📝</span> System Logs
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="revenue-card">
+        <div class="revenue-label">Total Revenue</div>
+        <div class="revenue-amount" id="sidebar-revenue">₹0</div>
+        <div class="revenue-today" id="sidebar-vehicles">0 vehicles served</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">Real-time overview of SmartPark Premium facility</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card blue">
+          <div class="stat-label">Available Slots</div>
+          <div class="stat-value blue" id="stat-available">—</div>
+          <div class="stat-sub" id="stat-avail-sub">Loading...</div>
+          <div class="stat-icon">🅿️</div>
+        </div>
+        <div class="stat-card warn">
+          <div class="stat-label">Occupied</div>
+          <div class="stat-value warn" id="stat-occupied">—</div>
+          <div class="stat-sub" id="stat-occ-sub">Loading...</div>
+          <div class="stat-icon">🚗</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-value green" id="stat-revenue">₹0</div>
+          <div class="stat-sub" id="stat-completed">0 completed</div>
+          <div class="stat-icon">💰</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-label">Active Vehicles</div>
+          <div class="stat-value purple" id="stat-active">0</div>
+          <div class="stat-sub">Currently parked</div>
+          <div class="stat-icon">🎫</div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <!-- Occupancy breakdown -->
+        <div class="card">
+          <div class="card-title">
+            <div class="ct-icon">📈</div>
+            Slot Occupancy Breakdown
+          </div>
+          <div id="occ-bars">
+            <div style="color:var(--text3);font-size:0.82rem;">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Special slots -->
+        <div class="card">
+          <div class="card-title">
+            <div class="ct-icon">⭐</div>
+            Special Slot Status
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.25rem;" id="special-slots">
+          </div>
+        </div>
+      </div>
+
+      <!-- Rate Card -->
+      <div class="card">
+        <div class="card-title">
+          <div class="ct-icon">💲</div>
+          Pricing & Rates
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;">
+          <div style="text-align:center;padding:1rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border2);">
+            <div style="font-size:1.5rem;">🏍️</div>
+            <div style="font-size:0.75rem;color:var(--text2);margin:4px 0;">Motorcycle</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.95rem;color:var(--accent3);">₹20/hr</div>
+          </div>
+          <div style="text-align:center;padding:1rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border2);">
+            <div style="font-size:1.5rem;">🚗</div>
+            <div style="font-size:0.75rem;color:var(--text2);margin:4px 0;">Car</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.95rem;color:var(--accent3);">₹50/hr</div>
+          </div>
+          <div style="text-align:center;padding:1rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border2);">
+            <div style="font-size:1.5rem;">🚚</div>
+            <div style="font-size:0.75rem;color:var(--text2);margin:4px 0;">Truck</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.95rem;color:var(--accent3);">₹100/hr</div>
+          </div>
+          <div style="text-align:center;padding:1rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border2);">
+            <div style="font-size:1.5rem;">⚡</div>
+            <div style="font-size:0.75rem;color:var(--text2);margin:4px 0;">Electric Car</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.95rem;color:var(--accent3);">₹40/hr</div>
+            <div style="font-size:0.65rem;color:var(--accent);">20% off</div>
+          </div>
+          <div style="text-align:center;padding:1rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border2);">
+            <div style="font-size:1.5rem;">♿</div>
+            <div style="font-size:0.75rem;color:var(--text2);margin:4px 0;">Handicapped</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.95rem;color:var(--accent3);">₹25/hr</div>
+          </div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:0.75rem;">* Minimum 1 hour charge. Billing rounded up per hour.</div>
+      </div>
+    </div>
+
+    <!-- ===== CHECK IN ===== -->
+    <div class="page" id="page-checkin">
+      <div class="page-header">
+        <div class="page-title">Vehicle Check-In</div>
+        <div class="page-sub">Register a new vehicle and assign a parking slot</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:1.5rem;">
+        <div class="card">
+          <div class="card-title"><div class="ct-icon">🚗</div>Vehicle Details</div>
+
+          <div style="margin-bottom:1rem;">
+            <div class="form-label" style="margin-bottom:0.5rem;">Vehicle Type</div>
+            <div class="type-select-grid" id="type-select-grid">
+              <div class="type-btn selected" data-type="CAR" onclick="selectType(this,'CAR')">
+                <span class="ticon">🚗</span>Car<span class="rate-tag">₹50/hr</span>
+              </div>
+              <div class="type-btn" data-type="MOTORCYCLE" onclick="selectType(this,'MOTORCYCLE')">
+                <span class="ticon">🏍️</span>Moto<span class="rate-tag">₹20/hr</span>
+              </div>
+              <div class="type-btn" data-type="TRUCK" onclick="selectType(this,'TRUCK')">
+                <span class="ticon">🚚</span>Truck<span class="rate-tag">₹100/hr</span>
+              </div>
+              <div class="type-btn" data-type="ELECTRIC_CAR" onclick="selectType(this,'ELECTRIC_CAR')">
+                <span class="ticon">⚡</span>EV Car<span class="rate-tag">₹40/hr</span>
+              </div>
+              <div class="type-btn" data-type="HANDICAPPED" onclick="selectType(this,'HANDICAPPED')">
+                <span class="ticon">♿</span>Special<span class="rate-tag">₹25/hr</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">License Plate *</label>
+                <input class="form-input" id="ci-plate" placeholder="GJ01AB1234" style="text-transform:uppercase;">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Owner Name *</label>
+                <input class="form-input" id="ci-owner" placeholder="Full name">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Owner Phone</label>
+              <input class="form-input" id="ci-phone" placeholder="+91 98765 43210" type="tel">
+            </div>
+            <button class="btn btn-primary" onclick="doCheckIn()" style="width:100%;justify-content:center;">
+              🚀 Assign Parking Slot & Generate Ticket
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><div class="ct-icon">ℹ️</div>Slot Availability Preview</div>
+          <div id="slot-preview">
+            <div style="display:grid;gap:0.6rem;" id="avail-preview-list">
+              <div style="color:var(--text3);font-size:0.82rem;">Loading availability...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CHECK OUT ===== -->
+    <div class="page" id="page-checkout">
+      <div class="page-header">
+        <div class="page-title">Vehicle Check-Out</div>
+        <div class="page-sub">Process payment and release parking slot</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div class="card">
+          <div class="card-title"><div class="ct-icon">🎫</div>Enter Ticket or Plate</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Ticket ID</label>
+              <input class="form-input" id="co-ticket" placeholder="TKT1000" style="font-family:'DM Mono',monospace;">
+            </div>
+            <div style="text-align:center;color:var(--text3);font-size:0.8rem;">— or —</div>
+            <div class="form-group">
+              <label class="form-label">License Plate</label>
+              <input class="form-input" id="co-plate" placeholder="GJ01AB1234" style="text-transform:uppercase;">
+            </div>
+            <div style="display:flex;gap:0.75rem;">
+              <button class="btn btn-ghost" style="flex:1;justify-content:center;" onclick="findForCheckout()">🔍 Lookup</button>
+              <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="doCheckOut()" id="co-btn" disabled>
+                💳 Process Payment
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="co-details-card" style="display:none;">
+          <div class="card-title"><div class="ct-icon">📄</div>Parking Summary</div>
+          <div id="co-details-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FIND VEHICLE ===== -->
+    <div class="page" id="page-find">
+      <div class="page-header">
+        <div class="page-title">Find Vehicle</div>
+        <div class="page-sub">Search by license plate to locate any parked vehicle</div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="ct-icon">🔍</div>Search</div>
+        <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;">
+          <input class="form-input" id="find-plate" placeholder="Enter license plate..." style="flex:1;text-transform:uppercase;" onkeydown="if(event.key==='Enter')doFind()">
+          <button class="btn btn-primary" onclick="doFind()">Search</button>
+        </div>
+        <div id="find-result"></div>
+      </div>
+    </div>
+
+    <!-- ===== PARKING MAP ===== -->
+    <div class="page" id="page-map">
+      <div class="page-header">
+        <div class="page-title">Parking Map</div>
+        <div class="page-sub">Visual slot layout — click a slot to see details</div>
+      </div>
+      <div class="card">
+        <div class="floor-tabs" id="floor-tabs">
+          <div class="floor-tab active" onclick="showFloor(0,this)">Ground Floor</div>
+          <div class="floor-tab" onclick="showFloor(1,this)">Floor 1</div>
+          <div class="floor-tab" onclick="showFloor(2,this)">Floor 2</div>
+        </div>
+        <div id="map-grid-container">
+          <div class="slot-grid" id="slot-grid"></div>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(16,185,129,0.4)"></div>Available</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(239,68,68,0.4)"></div>Occupied</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(0,212,255,0.3)"></div>EV Charging</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(124,58,237,0.3)"></div>Handicapped</div>
+          <div class="legend-item" style="margin-left:auto;font-size:0.7rem;color:var(--text3);">S=Small &nbsp; M=Medium &nbsp; L=Large</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ACTIVE TICKETS ===== -->
+    <div class="page" id="page-active">
+      <div class="page-header">
+        <div class="page-title">Active Tickets</div>
+        <div class="page-sub">All currently parked vehicles</div>
+      </div>
+      <div class="card">
+        <div class="search-bar">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input placeholder="Filter by plate, owner, slot..." id="active-search" oninput="filterActive()">
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadActive()">↻ Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ticket</th>
+                <th>Plate</th>
+                <th>Type</th>
+                <th>Owner</th>
+                <th>Slot</th>
+                <th>Since</th>
+                <th>Duration</th>
+                <th>Est. Fee</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="active-tbody">
+              <tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🎫</div><div class="empty-text">No active tickets</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== HISTORY ===== -->
+    <div class="page" id="page-history">
+      <div class="page-header">
+        <div class="page-title">Transaction History</div>
+        <div class="page-sub">Completed parking sessions</div>
+      </div>
+      <div class="card">
+        <div class="search-bar">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input placeholder="Filter history..." id="hist-search" oninput="filterHistory()">
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadHistory()">↻ Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ticket</th>
+                <th>Plate</th>
+                <th>Slot</th>
+                <th>Entry</th>
+                <th>Exit</th>
+                <th>Duration</th>
+                <th>Amount Paid</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="hist-tbody">
+              <tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No history yet</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LOGS ===== -->
+    <div class="page" id="page-logs">
+      <div class="page-header">
+        <div class="page-title">System Logs</div>
+        <div class="page-sub">Live feed from Java backend — file-based persistence</div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <div style="font-size:0.8rem;color:var(--text3);">Showing last 50 entries from <code style="color:var(--accent);font-size:0.78rem;">parking_log.txt</code></div>
+          <button class="btn btn-ghost btn-sm" onclick="loadLogs()">↻ Refresh</button>
+        </div>
+        <div class="log-viewer" id="log-viewer">
+          <div class="log-line system">Connecting to server...</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Ticket Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title">Parking Ticket</div>
+        <div style="font-size:0.75rem;color:var(--text3);margin-top:3px;" id="modal-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<script>
+const API = 'http://localhost:8080/api';
+let allSlots = [];
+let allActive = [];
+let allHistory = [];
+let currentFloor = 0;
+let selectedVehicleType = 'CAR';
+let checkoutTicketId = null;
+
+// ==================== NAVIGATION ====================
+function nav(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  event.currentTarget.classList.add('active');
+
+  if (page === 'dashboard') loadDashboard();
+  else if (page === 'checkin') { loadAvailabilityPreview(); }
+  else if (page === 'map') { loadSlots(); }
+  else if (page === 'active') loadActive();
+  else if (page === 'history') loadHistory();
+  else if (page === 'logs') loadLogs();
+}
+
+// ==================== API HELPERS ====================
+async function apiGet(path) {
+  const r = await fetch(API + path);
+  return r.json();
+}
+async function apiPost(path, data) {
+  const body = Object.entries(data).map(([k,v])=>`${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
+  const r = await fetch(API + path, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body});
+  return r.json();
+}
+
+// ==================== DASHBOARD ====================
+async function loadDashboard() {
+  try {
+    const res = await apiGet('/stats');
+    if (res.status !== 'success') return;
+    const d = res.data;
+
+    document.getElementById('stat-available').textContent = d.available;
+    document.getElementById('stat-occupied').textContent = d.occupied;
+    document.getElementById('stat-revenue').textContent = '₹' + d.totalRevenue.toFixed(0);
+    document.getElementById('stat-active').textContent = d.activeVehicles;
+    document.getElementById('stat-avail-sub').textContent = `of ${d.totalSlots} total slots`;
+    document.getElementById('stat-occ-sub').textContent = `${Math.round(d.occupied/d.totalSlots*100)}% full`;
+    document.getElementById('stat-completed').textContent = `${d.totalCompleted} completed`;
+
+    // Header
+    document.getElementById('h-available').textContent = d.available;
+    document.getElementById('h-occupied').textContent = d.occupied;
+    document.getElementById('h-revenue').textContent = '₹' + d.totalRevenue.toFixed(0);
+    document.getElementById('sidebar-revenue').textContent = '₹' + d.totalRevenue.toFixed(2);
+    document.getElementById('sidebar-vehicles').textContent = d.totalCompleted + ' vehicles served';
+    document.getElementById('active-count').textContent = d.activeVehicles;
+
+    // Occupancy bars
+    const bars = [
+      {label:'Small', avail: d.smallAvail, total: 15, color:'#10b981'},
+      {label:'Medium', avail: d.mediumAvail, total: 30, color:'#00d4ff'},
+      {label:'Large', avail: d.largeAvail, total: 15, color:'#f59e0b'},
+    ];
+    document.getElementById('occ-bars').innerHTML = bars.map(b => {
+      const occ = b.total - b.avail;
+      const pct = Math.round(occ / b.total * 100);
+      return `<div class="occ-bar-wrap">
+        <div class="occ-label">${b.label}</div>
+        <div class="occ-bar"><div class="occ-fill" style="width:${pct}%;background:${b.color}"></div></div>
+        <div class="occ-pct">${pct}%</div>
+      </div>`;
+    }).join('');
+
+    // Special slots
+    document.getElementById('special-slots').innerHTML = `
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:0.85rem;">
+        <div style="font-size:1.2rem;margin-bottom:4px;">⚡</div>
+        <div style="font-size:0.75rem;color:var(--text2);">EV Charging</div>
+        <div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);margin-top:3px;">${d.evAvail} free</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:0.85rem;">
+        <div style="font-size:1.2rem;margin-bottom:4px;">♿</div>
+        <div style="font-size:0.75rem;color:var(--text2);">Handicapped</div>
+        <div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent2);margin-top:3px;">${d.handicappedAvail} free</div>
+      </div>
+    `;
+  } catch(e) {
+    showToast('Cannot connect to Java server. Make sure it is running on port 8080.', 'error');
+  }
+}
+
+// ==================== CHECK IN ====================
+function selectType(el, type) {
+  selectedVehicleType = type;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  loadAvailabilityPreview();
+}
+
+async function loadAvailabilityPreview() {
+  try {
+    const res = await apiGet('/slots');
+    if (res.status !== 'success') return;
+    const slots = res.data;
+    const avail = slots.filter(s => s.status === 'AVAILABLE');
+    const rates = {CAR:50,MOTORCYCLE:20,TRUCK:100,ELECTRIC_CAR:40,HANDICAPPED:25};
+    const sizeNeeded = {CAR:'MEDIUM',MOTORCYCLE:'SMALL',TRUCK:'LARGE',ELECTRIC_CAR:'MEDIUM',HANDICAPPED:'MEDIUM'};
+    const needed = sizeNeeded[selectedVehicleType];
+    const suitable = avail.filter(s => s.size === needed || (needed === 'MEDIUM' && s.size === 'LARGE'));
+
+    document.getElementById('avail-preview-list').innerHTML = `
+      <div style="display:flex;justify-content:space-between;margin-bottom:0.75rem;">
+        <span style="font-size:0.8rem;color:var(--text2);">Suitable slots available</span>
+        <span style="font-family:'DM Mono',monospace;color:var(--accent);font-size:0.9rem;">${suitable.length}</span>
+      </div>
+      ${suitable.slice(0,6).map(s=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0.75rem;background:var(--surface2);border-radius:6px;border:1px solid var(--border2);">
+          <div>
+            <span style="font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--text);">${s.slotId}</span>
+            <span style="font-size:0.7rem;color:var(--text3);margin-left:8px;">Floor ${s.floor}</span>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;">
+            ${s.isEVCharging ? '<span style="font-size:0.65rem;background:rgba(0,212,255,0.1);color:var(--accent);padding:1px 5px;border-radius:4px;">EV</span>' : ''}
+            ${s.isHandicapped ? '<span style="font-size:0.65rem;background:rgba(124,58,237,0.1);color:var(--accent2);padding:1px 5px;border-radius:4px;">H</span>' : ''}
+            <span style="font-size:0.7rem;color:var(--accent3);">${s.size}</span>
+          </div>
+        </div>`).join('')}
+      ${suitable.length > 6 ? `<div style="text-align:center;font-size:0.75rem;color:var(--text3);padding:0.5rem;">+${suitable.length-6} more available</div>` : ''}
+      ${suitable.length === 0 ? '<div style="text-align:center;color:var(--danger);font-size:0.85rem;padding:1rem;">No suitable slots available for this type</div>' : ''}
+      <div style="margin-top:1rem;padding:0.75rem;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.15);border-radius:8px;">
+        <div style="font-size:0.72rem;color:var(--text3);">Rate for ${selectedVehicleType.replace('_',' ')}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:1.2rem;color:var(--accent3);">₹${rates[selectedVehicleType]}/hour</div>
+        <div style="font-size:0.68rem;color:var(--text3);margin-top:2px;">Min. 1 hour · Billed per hour</div>
+      </div>
+    `;
+  } catch(e) {}
+}
+
+async function doCheckIn() {
+  const plate = document.getElementById('ci-plate').value.trim().toUpperCase();
+  const owner = document.getElementById('ci-owner').value.trim();
+  const phone = document.getElementById('ci-phone').value.trim();
+
+  if (!plate || !owner) { showToast('License plate and owner name are required', 'error'); return; }
+
+  try {
+    const res = await apiPost('/checkin', {
+      vehicleType: selectedVehicleType,
+      licensePlate: plate,
+      ownerName: owner,
+      ownerPhone: phone || 'N/A'
+    });
+
+    if (res.status === 'success') {
+      const t = res.data;
+      showTicketModal(t, 'checkin');
+      showToast('Vehicle checked in successfully!', 'success');
+      document.getElementById('ci-plate').value = '';
+      document.getElementById('ci-owner').value = '';
+      document.getElementById('ci-phone').value = '';
+      loadAvailabilityPreview();
+      loadDashboard();
+    } else {
+      showToast(res.message, 'error');
+    }
+  } catch(e) {
+    showToast('Server connection error', 'error');
+  }
+}
+
+// ==================== CHECK OUT ====================
+async function findForCheckout() {
+  const ticketId = document.getElementById('co-ticket').value.trim();
+  const plate = document.getElementById('co-plate').value.trim().toUpperCase();
+
+  try {
+    let res;
+    if (ticketId) {
+      // Lookup in active tickets by ID
+      const activeRes = await apiGet('/active');
+      if (activeRes.status === 'success') {
+        const found = activeRes.data.find(t => t.ticketId === ticketId);
+        if (found) { showCheckoutDetails(found); return; }
+      }
+      showToast('Ticket not found', 'error'); return;
+    } else if (plate) {
+      res = await apiGet('/find?plate=' + encodeURIComponent(plate));
+      if (res.status === 'success') { showCheckoutDetails(res.data); return; }
+      showToast(res.message || 'Vehicle not found', 'error');
+    } else {
+      showToast('Enter ticket ID or license plate', 'error');
+    }
+  } catch(e) {
+    showToast('Server error', 'error');
+  }
+}
+
+function showCheckoutDetails(t) {
+  checkoutTicketId = t.ticketId;
+  document.getElementById('co-ticket').value = t.ticketId;
+  document.getElementById('co-btn').disabled = false;
+  document.getElementById('co-details-card').style.display = 'block';
+  document.getElementById('co-details-content').innerHTML = `
+    <div class="ticket-receipt">
+      <div class="receipt-row"><span class="receipt-key">Ticket</span><span class="receipt-val">${t.ticketId}</span></div>
+      <div class="receipt-row"><span class="receipt-key">Plate</span><span class="receipt-val"><span class="plate-tag">${t.licensePlate}</span></span></div>
+      <div class="receipt-row"><span class="receipt-key">Owner</span><span class="receipt-val">${t.ownerName}</span></div>
+      <div class="receipt-row"><span class="receipt-key">Type</span><span class="receipt-val">${t.vehicleType}</span></div>
+      <div class="receipt-row"><span class="receipt-key">Slot</span><span class="receipt-val">${t.slotId}</span></div>
+      <div class="receipt-row"><span class="receipt-key">Entry</span><span class="receipt-val">${t.entryTime}</span></div>
+      <div class="receipt-row"><span class="receipt-key">Duration</span><span class="receipt-val">${formatDuration(t.durationMinutes)}</span></div>
+      <div class="receipt-divider"></div>
+      <div class="receipt-row"><span class="receipt-key">Est. Fee</span><span class="receipt-val big">₹${t.estimatedFee.toFixed(2)}</span></div>
+    </div>
+  `;
+}
+
+async function doCheckOut() {
+  if (!checkoutTicketId) return;
+  try {
+    const res = await apiPost('/checkout', { ticketId: checkoutTicketId });
+    if (res.status === 'success') {
+      showTicketModal(res.data, 'checkout');
+      showToast('Payment processed! Slot released.', 'success');
+      checkoutTicketId = null;
+      document.getElementById('co-ticket').value = '';
+      document.getElementById('co-plate').value = '';
+      document.getElementById('co-btn').disabled = true;
+      document.getElementById('co-details-card').style.display = 'none';
+      loadDashboard();
+    } else {
+      showToast(res.message, 'error');
+    }
+  } catch(e) {
+    showToast('Server error', 'error');
+  }
+}
+
+// ==================== FIND ====================
+async function doFind() {
+  const plate = document.getElementById('find-plate').value.trim().toUpperCase();
+  if (!plate) return;
+  try {
+    const res = await apiGet('/find?plate=' + encodeURIComponent(plate));
+    const el = document.getElementById('find-result');
+    if (res.status === 'success') {
+      const t = res.data;
+      el.innerHTML = `
+        <div class="ticket-receipt">
+          <div class="receipt-header">
+            <div class="receipt-title">🅿 VEHICLE FOUND</div>
+            <div class="receipt-sub">${t.ticketId}</div>
+          </div>
+          <div class="receipt-row"><span class="receipt-key">License Plate</span><span class="receipt-val"><span class="plate-tag">${t.licensePlate}</span></span></div>
+          <div class="receipt-row"><span class="receipt-key">Owner</span><span class="receipt-val">${t.ownerName}</span></div>
+          <div class="receipt-row"><span class="receipt-key">Phone</span><span class="receipt-val">${t.ownerPhone}</span></div>
+          <div class="receipt-row"><span class="receipt-key">Vehicle Type</span><span class="receipt-val">${t.vehicleType}</span></div>
+          <div class="receipt-row"><span class="receipt-key">Slot</span><span class="receipt-val" style="color:var(--accent)">${t.slotId}</span></div>
+          <div class="receipt-row"><span class="receipt-key">Entry Time</span><span class="receipt-val">${t.entryTime}</span></div>
+          <div class="receipt-row"><span class="receipt-key">Duration</span><span class="receipt-val">${formatDuration(t.durationMinutes)}</span></div>
+          <div class="receipt-divider"></div>
+          <div class="receipt-row"><span class="receipt-key">Current Fee</span><span class="receipt-val big">₹${t.estimatedFee.toFixed(2)}</span></div>
+        </div>
+      `;
+    } else {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">${res.message}</div></div>`;
+    }
+  } catch(e) {
+    showToast('Server error', 'error');
+  }
+}
+
+// ==================== MAP ====================
+async function loadSlots() {
+  try {
+    const res = await apiGet('/slots');
+    if (res.status !== 'success') return;
+    allSlots = res.data;
+    renderFloor(currentFloor);
+  } catch(e) {}
+}
+
+function showFloor(floor, el) {
+  currentFloor = floor;
+  document.querySelectorAll('.floor-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderFloor(floor);
+}
+
+function renderFloor(floor) {
+  const slots = allSlots.filter(s => s.floor === floor);
+  const grid = document.getElementById('slot-grid');
+  grid.innerHTML = slots.map(s => {
+    let cls = s.status.toLowerCase();
+    let icon = '🅿';
+    if (s.isEVCharging && s.status === 'AVAILABLE') { cls = 'ev'; icon = '⚡'; }
+    if (s.isHandicapped && s.status === 'AVAILABLE') { cls = 'handicapped'; icon = '♿'; }
+    if (s.status === 'OCCUPIED') icon = '🚗';
+    const sizeLabel = s.size[0]; // S, M, L
+    return `<div class="slot ${cls}" title="${s.slotId}\n${s.size}\n${s.status}${s.occupiedBy ? '\n'+s.occupiedBy : ''}">
+      <span class="slot-icon">${icon}</span>
+      <span class="slot-id">${s.slotId}</span>
+      <span style="font-size:0.38rem;color:inherit;opacity:0.7">${sizeLabel}</span>
+    </div>`;
+  }).join('');
+}
+
+// ==================== ACTIVE TICKETS ====================
+async function loadActive() {
+  try {
+    const res = await apiGet('/active');
+    if (res.status !== 'success') return;
+    allActive = res.data;
+    document.getElementById('active-count').textContent = allActive.length;
+    renderActive(allActive);
+  } catch(e) {}
+}
+
+function renderActive(data) {
+  const tbody = document.getElementById('active-tbody');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🎫</div><div class="empty-text">No active tickets</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(t => `
+    <tr>
+      <td><span style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--accent)">${t.ticketId}</span></td>
+      <td><span class="plate-tag">${t.licensePlate}</span></td>
+      <td>${t.vehicleType}</td>
+      <td>${t.ownerName}</td>
+      <td><span style="color:var(--accent3)">${t.slotId}</span></td>
+      <td style="font-size:0.78rem">${t.entryTime}</td>
+      <td style="font-family:'DM Mono',monospace">${formatDuration(t.durationMinutes)}</td>
+      <td style="color:var(--accent3);font-family:'DM Mono',monospace">₹${t.estimatedFee.toFixed(0)}</td>
+      <td>
+        <button class="btn btn-danger btn-sm" onclick="quickCheckout('${t.ticketId}')">Checkout</button>
+      </td>
+    </tr>`).join('');
+}
+
+function filterActive() {
+  const q = document.getElementById('active-search').value.toLowerCase();
+  renderActive(allActive.filter(t =>
+    t.licensePlate.toLowerCase().includes(q) ||
+    t.ownerName.toLowerCase().includes(q) ||
+    t.slotId.toLowerCase().includes(q) ||
+    t.ticketId.toLowerCase().includes(q)
+  ));
+}
+
+async function quickCheckout(ticketId) {
+  const t = allActive.find(a => a.ticketId === ticketId);
+  if (!t) return;
+  // Switch to checkout page and prefill
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-checkout').classList.add('active');
+  document.getElementById('co-ticket').value = ticketId;
+  checkoutTicketId = ticketId;
+  document.getElementById('co-btn').disabled = false;
+  showCheckoutDetails(t);
+}
+
+// ==================== HISTORY ====================
+async function loadHistory() {
+  try {
+    const res = await apiGet('/history');
+    if (res.status !== 'success') return;
+    allHistory = res.data.reverse();
+    renderHistory(allHistory);
+  } catch(e) {}
+}
+
+function renderHistory(data) {
+  const tbody = document.getElementById('hist-tbody');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">No completed sessions yet</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(t => `
+    <tr>
+      <td><span style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--text2)">${t.ticketId}</span></td>
+      <td><span class="plate-tag">${t.licensePlate}</span></td>
+      <td><span style="color:var(--accent3)">${t.slotId}</span></td>
+      <td style="font-size:0.78rem">${t.entryTime}</td>
+      <td style="font-size:0.78rem">${t.exitTime}</td>
+      <td style="font-family:'DM Mono',monospace">${formatDuration(t.durationMinutes)}</td>
+      <td style="color:var(--accent3);font-weight:600;font-family:'DM Mono',monospace">₹${t.amountPaid.toFixed(2)}</td>
+      <td><span class="badge badge-paid">PAID</span></td>
+    </tr>`).join('');
+}
+
+function filterHistory() {
+  const q = document.getElementById('hist-search').value.toLowerCase();
+  renderHistory(allHistory.filter(t =>
+    t.licensePlate.toLowerCase().includes(q) ||
+    t.slotId.toLowerCase().includes(q) ||
+    t.ticketId.toLowerCase().includes(q)
+  ));
+}
+
+// ==================== LOGS ====================
+async function loadLogs() {
+  try {
+    const res = await apiGet('/logs');
+    if (res.status !== 'success') return;
+    const viewer = document.getElementById('log-viewer');
+    viewer.innerHTML = res.data.map(line => {
+      let cls = 'log-line';
+      if (line.includes('CHECK-IN')) cls += ' check-in';
+      else if (line.includes('CHECK-OUT')) cls += ' check-out';
+      else if (line.includes('ERROR')) cls += ' error';
+      else if (line.includes('MONITOR')) cls += ' monitor';
+      else if (line.includes('SYSTEM') || line.includes('SERVER')) cls += ' system';
+      return `<div class="${cls}">${escHtml(line)}</div>`;
+    }).join('');
+    viewer.scrollTop = viewer.scrollHeight;
+  } catch(e) {
+    document.getElementById('log-viewer').innerHTML =
+      '<div class="log-line error">Cannot connect to Java server on localhost:8080</div>';
+  }
+}
+
+// ==================== MODAL ====================
+function showTicketModal(t, type) {
+  const isCheckIn = type === 'checkin';
+  document.getElementById('modal-title').textContent = isCheckIn ? '✅ Check-In Successful' : '💳 Payment Receipt';
+  document.getElementById('modal-sub').textContent = isCheckIn ? 'Parking slot assigned' : 'Thank you — see you again!';
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="ticket-receipt">
+      <div class="receipt-header">
+        <div class="receipt-title">🅿 SMARTPARK PREMIUM</div>
+        <div class="receipt-sub">${t.ticketId} · ${isCheckIn ? t.entryTime : t.exitTime}</div>
+      </div>
+      <div class="receipt-row"><span class="receipt-key">License Plate</span><span class="receipt-val"><span class="plate-tag">${t.licensePlate}</span></span></div>
+      <div class="receipt-row"><span class="receipt-key">Owner</span><span class="receipt-val">${t.ownerName}</span></div>
+      <div class="receipt-row"><span class="receipt-key">Vehicle Type</span><span class="receipt-val">${t.vehicleType}</span></div>
+      <div class="receipt-row"><span class="receipt-key">Parking Slot</span><span class="receipt-val" style="color:var(--accent)">${t.slotId}</span></div>
+      ${isCheckIn ? `
+        <div class="receipt-row"><span class="receipt-key">Entry Time</span><span class="receipt-val">${t.entryTime}</span></div>
+      ` : `
+        <div class="receipt-row"><span class="receipt-key">Entry Time</span><span class="receipt-val">${t.entryTime}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Exit Time</span><span class="receipt-val">${t.exitTime}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Duration</span><span class="receipt-val">${formatDuration(t.durationMinutes)}</span></div>
+      `}
+      <div class="receipt-divider"></div>
+      <div class="receipt-row">
+        <span class="receipt-key">${isCheckIn ? 'Est. Rate' : 'Amount Paid'}</span>
+        <span class="receipt-val big">${isCheckIn ? '₹'+t.estimatedFee.toFixed(2)+' est.' : '₹'+t.amountPaid.toFixed(2)}</span>
+      </div>
+      ${!isCheckIn ? '<div style="text-align:center;margin-top:0.75rem;font-size:0.72rem;color:var(--accent3);">✓ Payment Received</div>' : ''}
+    </div>`;
+
+  document.getElementById('modal-footer').innerHTML = `
+    <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+    <button class="btn btn-primary" onclick="printTicket()">🖨️ Print Ticket</button>`;
+
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+function printTicket() {
+  const content = document.getElementById('modal-body').innerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(`<html><head><title>Parking Ticket</title>
+    <style>
+      body{font-family:monospace;padding:2rem;background:#fff;color:#000;}
+      .receipt-row{display:flex;justify-content:space-between;margin:6px 0;font-size:0.9rem;}
+      .receipt-header{text-align:center;margin-bottom:1rem;border-bottom:1px dashed #ccc;padding-bottom:0.5rem;}
+      .receipt-title{font-size:1.1rem;font-weight:bold;}
+      .receipt-divider{border-top:1px dashed #ccc;margin:0.75rem 0;}
+      .receipt-val.big{font-size:1.2rem;font-weight:bold;}
+      .plate-tag{font-family:monospace;background:#eee;padding:1px 5px;border-radius:3px;}
+    </style></head><body>${content}</body></html>`);
+  win.print();
+}
+function showToast(msg, type='info') {
+  const icons = {success:'✅', error:'❌', info:'ℹ️'};
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+// ==================== UTILS ====================
+function formatDuration(minutes) {
+  if (!minutes && minutes !== 0) return '—';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m}m`;
+  return `${h}h ${m}m`;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ==================== AUTO-REFRESH ====================
+setInterval(() => {
+  const activePage = document.querySelector('.page.active');
+  if (activePage && activePage.id === 'page-dashboard') loadDashboard();
+  if (activePage && activePage.id === 'page-active') loadActive();
+  if (activePage && activePage.id === 'page-map') loadSlots();
+}, 15000);
+
+// ==================== INIT ====================
+loadDashboard();
+</script>
+</body>
+</html>

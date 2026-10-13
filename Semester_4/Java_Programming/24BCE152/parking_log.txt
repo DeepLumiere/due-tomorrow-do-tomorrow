@@ -1,0 +1,39 @@
+[2026-04-03 10:39:32] [SYSTEM] === Parking System Started ===
+[2026-04-03 10:40:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:41:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:42:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:43:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:44:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:45:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:46:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:47:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:48:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:53:57] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:53:57] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:53:57] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:53:57] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:53:57] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:54:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:55:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:56:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:57:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹0.00
+[2026-04-03 10:57:42] [CHECK-IN] [CAR] GJ10AB1011 | HGBN | 00D2150D -> F0S06 | Ticket: TKT1000
+[2026-04-03 10:58:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:1 | Available:59 | Revenue:₹0.00
+[2026-04-03 10:59:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:1 | Available:59 | Revenue:₹0.00
+[2026-04-03 10:59:03] [CHECK-OUT] [CAR] GJ10AB1011 | HGBN | 00D2150D from F0S06 | Duration: 1 mins | Fee: ₹50.0
+[2026-04-03 11:00:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:06:37] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:06:37] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:06:37] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:06:37] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:06:37] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:06:37] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:07:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:08:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:09:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:10:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:11:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:12:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:13:02] [MONITOR] SNAPSHOT | Total:60 | Occupied:0 | Available:60 | Revenue:₹50.00
+[2026-04-03 11:13:14] [MONITOR] Monitoring stopped.
+[2026-04-03 11:13:14] [SYSTEM] === Parking System Shutting Down ===

@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Parking Lot Management System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .topbar {
+      background: #1a3c5e;
+      color: white;
+      padding: 0 24px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar h1 { font-size: 17px; font-weight: 700; }
+    .topbar-right { display: flex; gap: 24px; font-size: 13px; }
+    .topbar-right span { opacity: 0.85; }
+    .topbar-right strong { font-weight: 700; }
+
+    .wrapper { display: flex; min-height: calc(100vh - 52px); }
+
+    .sidebar {
+      width: 200px;
+      background: #fff;
+      border-right: 1px solid #dde2e8;
+      padding: 16px 0;
+      flex-shrink: 0;
+    }
+    .sidebar-section {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #999;
+      padding: 12px 16px 6px;
+    }
+    .nav-link {
+      display: block;
+      padding: 9px 16px;
+      color: #555;
+      cursor: pointer;
+      font-size: 13.5px;
+      border-left: 3px solid transparent;
+    }
+    .nav-link:hover { background: #f5f7fa; color: #1a3c5e; }
+    .nav-link.active {
+      background: #edf2fb;
+      color: #1a3c5e;
+      font-weight: 700;
+      border-left-color: #1a3c5e;
+    }
+
+    .main { flex: 1; padding: 24px; overflow-y: auto; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-title { font-size: 18px; font-weight: 700; color: #1a3c5e; margin-bottom: 4px; }
+    .page-subtitle { font-size: 12.5px; color: #888; margin-bottom: 20px; }
+
+    .card {
+      background: #fff;
+      border: 1px solid #dde2e8;
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a3c5e;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 18px; }
+    .stat-box {
+      background: #fff;
+      border: 1px solid #dde2e8;
+      border-radius: 6px;
+      padding: 16px;
+      border-top: 3px solid #1a3c5e;
+    }
+    .stat-box.green  { border-top-color: #2e7d32; }
+    .stat-box.orange { border-top-color: #e65100; }
+    .stat-box.blue   { border-top-color: #1565c0; }
+    .stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 6px; }
+    .stat-val   { font-size: 26px; font-weight: 700; color: #1a3c5e; }
+    .stat-val.green  { color: #2e7d32; }
+    .stat-val.orange { color: #e65100; }
+    .stat-val.blue   { color: #1565c0; }
+    .stat-note  { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+    .form-grid { display: grid; gap: 14px; }
+    .form-2col { grid-template-columns: 1fr 1fr; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 12px; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: 0.4px; }
+    .form-control {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 8px 10px;
+      font-size: 13.5px;
+      font-family: 'Nunito', sans-serif;
+      color: #333;
+      outline: none;
+      background: #fff;
+      width: 100%;
+    }
+    .form-control:focus { border-color: #1a3c5e; }
+
+    .type-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .type-option {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      background: #fafafa;
+    }
+    .type-option input { cursor: pointer; accent-color: #1a3c5e; }
+    .type-option.selected { background: #edf2fb; border-color: #1a3c5e; color: #1a3c5e; font-weight: 700; }
+    .type-rate { font-size: 11px; color: #888; margin-left: 2px; }
+
+    .btn {
+      padding: 9px 20px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+    }
+    .btn:hover { opacity: 0.88; }
+    .btn:disabled { opacity: 0.45; cursor: default; }
+    .btn-primary  { background: #1a3c5e; color: white; }
+    .btn-success  { background: #2e7d32; color: white; }
+    .btn-danger   { background: #c62828; color: white; }
+    .btn-outline  { background: white; border-color: #ccc; color: #444; }
+    .btn-sm       { padding: 5px 12px; font-size: 12px; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: #f5f7fa;
+      border: 1px solid #dde2e8;
+      padding: 9px 12px;
+      text-align: left;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #666;
+    }
+    tbody td { border: 1px solid #eee; padding: 9px 12px; color: #444; vertical-align: middle; }
+    tbody tr:hover td { background: #fafbfd; }
+
+    .badge { display: inline-block; padding: 2px 9px; border-radius: 3px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+    .badge-active { background: #e8f5e9; color: #2e7d32; }
+    .badge-paid   { background: #e3f2fd; color: #1565c0; }
+    .badge-ev     { background: #e0f7fa; color: #00695c; }
+    .badge-handi  { background: #ede7f6; color: #4527a0; }
+
+    .receipt { background: #fafafa; border: 1px solid #dde2e8; border-radius: 5px; padding: 18px; font-size: 13px; }
+    .receipt-heading { text-align: center; font-size: 15px; font-weight: 700; color: #1a3c5e; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px dashed #ccc; }
+    .receipt-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
+    .receipt-row:last-child { border-bottom: none; }
+    .receipt-key { color: #777; }
+    .receipt-val { font-weight: 600; color: #333; }
+    .receipt-total { font-size: 16px; font-weight: 700; color: #2e7d32; }
+    .receipt-divider { border: none; border-top: 1px dashed #ccc; margin: 10px 0; }
+
+    .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: center; justify-content: center; }
+    .modal-bg.open { display: flex; }
+    .modal-box { background: white; border-radius: 6px; width: 440px; max-width: 95vw; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
+    .modal-header { padding: 14px 18px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { font-size: 15px; font-weight: 700; color: #1a3c5e; }
+    .modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: #999; }
+    .modal-close:hover { color: #333; }
+    .modal-body { padding: 18px; }
+    .modal-footer { padding: 12px 18px; border-top: 1px solid #eee; display: flex; gap: 8px; justify-content: flex-end; }
+
+    .alert { padding: 10px 14px; border-radius: 4px; font-size: 13px; margin-bottom: 14px; border-left: 4px solid; }
+    .alert-success { background: #e8f5e9; border-color: #2e7d32; color: #1b5e20; }
+    .alert-error   { background: #fce4ec; border-color: #c62828; color: #7f0000; }
+    .alert-info    { background: #e3f2fd; border-color: #1565c0; color: #0d3c6e; }
+
+    .floor-tabs { display: flex; gap: 0; margin-bottom: 16px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; width: fit-content; }
+    .floor-tab { padding: 7px 18px; cursor: pointer; font-size: 13px; font-weight: 600; background: #fafafa; color: #666; border-right: 1px solid #ccc; }
+    .floor-tab:last-child { border-right: none; }
+    .floor-tab.active { background: #1a3c5e; color: white; }
+
+    .slot-map { display: grid; grid-template-columns: repeat(10,1fr); gap: 5px; margin-bottom: 14px; }
+    .slot-cell { border: 1px solid #ccc; border-radius: 3px; padding: 5px 3px; text-align: center; font-size: 9px; line-height: 1.4; }
+    .slot-cell .sid { font-weight: 700; color: #333; }
+    .slot-cell .stype { color: #999; font-size: 8px; }
+    .slot-cell.avail    { background: #f1f8f1; border-color: #a5d6a7; }
+    .slot-cell.occ      { background: #fce4ec; border-color: #ef9a9a; }
+    .slot-cell.ev-slot  { background: #e0f7fa; border-color: #80cbc4; }
+    .slot-cell.handi    { background: #ede7f6; border-color: #ce93d8; }
+
+    .map-legend { display: flex; gap: 16px; font-size: 12px; color: #666; flex-wrap: wrap; }
+    .leg { display: flex; align-items: center; gap: 5px; }
+    .leg-box { width: 14px; height: 14px; border-radius: 2px; border: 1px solid #ccc; flex-shrink: 0; }
+
+    .occ-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .occ-lbl { font-size: 12px; color: #666; width: 70px; text-align: right; }
+    .occ-bar { flex: 1; height: 10px; background: #eee; border-radius: 3px; overflow: hidden; }
+    .occ-fill { height: 100%; background: #1a3c5e; border-radius: 3px; transition: width 0.5s; }
+    .occ-pct { font-size: 12px; color: #888; width: 32px; }
+
+    .toolbar { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; }
+    .toolbar input { border: 1px solid #ccc; border-radius: 4px; padding: 7px 10px; font-size: 13px; font-family: 'Nunito', sans-serif; outline: none; flex: 1; max-width: 300px; }
+    .toolbar input:focus { border-color: #1a3c5e; }
+
+    .log-box { background: #1e1e1e; color: #d4d4d4; font-family: 'Courier New', monospace; font-size: 12px; padding: 14px; border-radius: 4px; height: 360px; overflow-y: auto; line-height: 1.7; }
+    .log-box .l-in  { color: #89d185; }
+    .log-box .l-out { color: #9cdcfe; }
+    .log-box .l-err { color: #f48771; }
+    .log-box .l-sys { color: #c586c0; }
+    .log-box .l-mon { color: #888; }
+
+    .two-col   { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .mt-10 { margin-top: 10px; }
+    .text-muted { color: #888; font-size: 12px; }
+    .mono { font-family: 'Courier New', monospace; font-size: 12.5px; }
+    .empty-msg { text-align: center; padding: 36px 0; color: #aaa; font-size: 13px; }
+    hr.divider { border: none; border-top: 1px solid #eee; margin: 16px 0; }
+
+    @media (max-width: 900px) {
+      .stat-row { grid-template-columns: 1fr 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Parking Lot Management System</h1>
+  <div class="topbar-right">
+    <span>Available: <strong id="hdr-avail">--</strong></span>
+    <span>Occupied: <strong id="hdr-occ">--</strong></span>
+    <span>Revenue: <strong id="hdr-rev">Rs. 0</strong></span>
+  </div>
+</div>
+
+<div class="wrapper">
+  <div class="sidebar">
+    <div class="sidebar-section">Operations</div>
+    <div class="nav-link active" onclick="showPage('dashboard',this)">Dashboard</div>
+    <div class="nav-link" onclick="showPage('checkin',this)">Check In</div>
+    <div class="nav-link" onclick="showPage('checkout',this)">Check Out</div>
+    <div class="nav-link" onclick="showPage('find',this)">Find Vehicle</div>
+    <div class="sidebar-section">Reports</div>
+    <div class="nav-link" onclick="showPage('map',this)">Parking Map</div>
+    <div class="nav-link" onclick="showPage('active',this)">Active Tickets</div>
+    <div class="nav-link" onclick="showPage('history',this)">History</div>
+    <div class="sidebar-section">System</div>
+    <div class="nav-link" onclick="showPage('logs',this)">System Logs</div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="page-subtitle">Overview of parking lot status</div>
+
+      <div class="stat-row">
+        <div class="stat-box blue">
+          <div class="stat-label">Available Slots</div>
+          <div class="stat-val blue" id="d-avail">--</div>
+          <div class="stat-note" id="d-avail-note">out of 60 total</div>
+        </div>
+        <div class="stat-box orange">
+          <div class="stat-label">Occupied Slots</div>
+          <div class="stat-val orange" id="d-occ">--</div>
+          <div class="stat-note" id="d-occ-pct">0% full</div>
+        </div>
+        <div class="stat-box green">
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-val green" id="d-rev">Rs. 0</div>
+          <div class="stat-note" id="d-completed">0 sessions</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Active Vehicles</div>
+          <div class="stat-val" id="d-active">0</div>
+          <div class="stat-note">currently parked</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Slot Occupancy by Type</div>
+          <div id="occ-bars"><div class="text-muted">Loading...</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Parking Rates</div>
+          <table>
+            <thead><tr><th>Vehicle Type</th><th>Slot Size</th><th>Rate (per hr)</th></tr></thead>
+            <tbody>
+              <tr><td>Motorcycle</td><td>Small</td><td>Rs. 20</td></tr>
+              <tr><td>Car</td><td>Medium</td><td>Rs. 50</td></tr>
+              <tr><td>Truck</td><td>Large</td><td>Rs. 100</td></tr>
+              <tr><td>Electric Car</td><td>Medium (EV)</td><td>Rs. 40 <span class="text-muted">(20% off)</span></td></tr>
+              <tr><td>Handicapped</td><td>Medium</td><td>Rs. 25</td></tr>
+            </tbody>
+          </table>
+          <div class="text-muted mt-10">Min. 1 hr charge. Billing rounded up per hour.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Special Slots</div>
+        <div class="two-col" id="special-status"><div class="text-muted">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- CHECK IN -->
+    <div class="page" id="page-checkin">
+      <div class="page-title">Vehicle Check-In</div>
+      <div class="page-subtitle">Fill in vehicle details to assign a parking slot</div>
+      <div id="ci-alert"></div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Vehicle Details</div>
+
+          <div class="form-group" style="margin-bottom:14px;">
+            <div class="form-label">Vehicle Type</div>
+            <div class="type-group" id="type-group">
+              <label class="type-option selected" onclick="selectType(this,'CAR')">
+                <input type="radio" name="vtype" value="CAR" checked> Car <span class="type-rate">Rs.50/hr</span>
+              </label>
+              <label class="type-option" onclick="selectType(this,'MOTORCYCLE')">
+                <input type="radio" name="vtype" value="MOTORCYCLE"> Motorcycle <span class="type-rate">Rs.20/hr</span>
+              </label>
+              <label class="type-option" onclick="selectType(this,'TRUCK')">
+                <input type="radio" name="vtype" value="TRUCK"> Truck <span class="type-rate">Rs.100/hr</span>
+              </label>
+              <label class="type-option" onclick="selectType(this,'ELECTRIC_CAR')">
+                <input type="radio" name="vtype" value="ELECTRIC_CAR"> Electric Car <span class="type-rate">Rs.40/hr</span>
+              </label>
+              <label class="type-option" onclick="selectType(this,'HANDICAPPED')">
+                <input type="radio" name="vtype" value="HANDICAPPED"> Handicapped <span class="type-rate">Rs.25/hr</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-grid form-2col">
+              <div class="form-group">
+                <label class="form-label">License Plate *</label>
+                <input class="form-control" id="ci-plate" placeholder="e.g. GJ01AB1234" style="text-transform:uppercase">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Owner Name *</label>
+                <input class="form-control" id="ci-owner" placeholder="Full name">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Owner Phone</label>
+              <input class="form-control" id="ci-phone" placeholder="10-digit mobile number" type="tel">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:4px;">
+              <button class="btn btn-primary" onclick="doCheckIn()">Assign Slot and Generate Ticket</button>
+              <button class="btn btn-outline" onclick="clearCheckIn()">Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Available Slots Preview</div>
+          <div id="avail-preview"><div class="text-muted">Select vehicle type to see available slots.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECK OUT -->
+    <div class="page" id="page-checkout">
+      <div class="page-title">Vehicle Check-Out</div>
+      <div class="page-subtitle">Enter ticket ID or license plate to process checkout</div>
+      <div id="co-alert"></div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Lookup Vehicle</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Ticket ID</label>
+              <input class="form-control mono" id="co-ticket" placeholder="e.g. TKT1000">
+            </div>
+            <div style="text-align:center;font-size:12px;color:#aaa;margin:2px 0;">--- OR ---</div>
+            <div class="form-group">
+              <label class="form-label">License Plate</label>
+              <input class="form-control" id="co-plate" placeholder="e.g. GJ01AB1234" style="text-transform:uppercase">
+            </div>
+            <div style="display:flex;gap:8px;margin-top:4px;">
+              <button class="btn btn-outline" onclick="findForCheckout()">Search</button>
+              <button class="btn btn-success" id="co-btn" onclick="doCheckOut()" disabled>Process Payment and Exit</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="co-detail-card" style="display:none;">
+          <div class="card-title">Parking Summary</div>
+          <div id="co-detail-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FIND VEHICLE -->
+    <div class="page" id="page-find">
+      <div class="page-title">Find Vehicle</div>
+      <div class="page-subtitle">Search by license plate number</div>
+      <div class="card">
+        <div class="card-title">Search</div>
+        <div style="display:flex;gap:8px;margin-bottom:18px;">
+          <input class="form-control" id="fv-plate" placeholder="Enter license plate number"
+            style="max-width:300px;text-transform:uppercase" onkeydown="if(event.key==='Enter')doFind()">
+          <button class="btn btn-primary" onclick="doFind()">Search</button>
+        </div>
+        <div id="fv-result"></div>
+      </div>
+    </div>
+
+    <!-- PARKING MAP -->
+    <div class="page" id="page-map">
+      <div class="page-title">Parking Map</div>
+      <div class="page-subtitle">Visual layout of all slots across floors</div>
+      <div class="card">
+        <div class="floor-tabs">
+          <div class="floor-tab active" onclick="switchFloor(0,this)">Ground Floor</div>
+          <div class="floor-tab" onclick="switchFloor(1,this)">Floor 1</div>
+          <div class="floor-tab" onclick="switchFloor(2,this)">Floor 2</div>
+        </div>
+        <div class="slot-map" id="slot-map"></div>
+        <div class="map-legend">
+          <div class="leg"><div class="leg-box" style="background:#f1f8f1;border-color:#a5d6a7;"></div> Available</div>
+          <div class="leg"><div class="leg-box" style="background:#fce4ec;border-color:#ef9a9a;"></div> Occupied</div>
+          <div class="leg"><div class="leg-box" style="background:#e0f7fa;border-color:#80cbc4;"></div> EV Charging</div>
+          <div class="leg"><div class="leg-box" style="background:#ede7f6;border-color:#ce93d8;"></div> Handicapped</div>
+          <div class="text-muted" style="margin-left:auto;">S = Small &nbsp; M = Medium &nbsp; L = Large</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVE TICKETS -->
+    <div class="page" id="page-active">
+      <div class="page-title">Active Tickets</div>
+      <div class="page-subtitle">All vehicles currently parked</div>
+      <div class="card">
+        <div class="toolbar">
+          <input id="at-search" placeholder="Filter by plate, owner, slot..." oninput="filterActive()">
+          <button class="btn btn-outline btn-sm" onclick="loadActive()">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ticket ID</th><th>License Plate</th><th>Vehicle Type</th>
+                <th>Owner</th><th>Slot</th><th>Entry Time</th>
+                <th>Duration</th><th>Est. Fee</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="at-tbody">
+              <tr><td colspan="9"><div class="empty-msg">No active tickets.</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="page" id="page-history">
+      <div class="page-title">Transaction History</div>
+      <div class="page-subtitle">All completed parking sessions</div>
+      <div class="card">
+        <div class="toolbar">
+          <input id="hist-search" placeholder="Filter history..." oninput="filterHistory()">
+          <button class="btn btn-outline btn-sm" onclick="loadHistory()">Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ticket ID</th><th>License Plate</th><th>Slot</th>
+                <th>Entry Time</th><th>Exit Time</th><th>Duration</th>
+                <th>Amount Paid</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="hist-tbody">
+              <tr><td colspan="8"><div class="empty-msg">No history yet.</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGS -->
+    <div class="page" id="page-logs">
+      <div class="page-title">System Logs</div>
+      <div class="page-subtitle">Last 50 entries from parking_log.txt (Java file handling)</div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <span class="text-muted">File: <span class="mono">parking_log.txt</span></span>
+          <button class="btn btn-outline btn-sm" onclick="loadLogs()">Refresh Logs</button>
+        </div>
+        <div class="log-box" id="log-box">Connecting to server...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-title">Ticket</h3>
+      <button class="modal-close" onclick="closeModal()">x</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Close</button>
+      <button class="btn btn-primary" onclick="printTicket()">Print Ticket</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8080/api';
+let allSlots = [], allActive = [], allHistory = [];
+let currentFloor = 0, checkoutTicketId = null, selectedType = 'CAR';
+
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+  if (name === 'dashboard') loadDashboard();
+  else if (name === 'checkin') loadAvailPreview();
+  else if (name === 'map') loadSlots();
+  else if (name === 'active') loadActive();
+  else if (name === 'history') loadHistory();
+  else if (name === 'logs') loadLogs();
+}
+
+async function apGet(path) { const r = await fetch(API+path); return r.json(); }
+async function apPost(path, data) {
+  const body = Object.entries(data).map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+  const r = await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
+  return r.json();
+}
+
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.innerHTML = msg ? `<div class="alert alert-${type}">${msg}</div>` : '';
+  if (type === 'success') setTimeout(() => el.innerHTML = '', 4000);
+}
+
+// DASHBOARD
+async function loadDashboard() {
+  try {
+    const r = await apGet('/stats');
+    if (r.status !== 'success') return;
+    const d = r.data;
+    document.getElementById('d-avail').textContent = d.available;
+    document.getElementById('d-occ').textContent = d.occupied;
+    document.getElementById('d-rev').textContent = 'Rs. ' + d.totalRevenue.toFixed(0);
+    document.getElementById('d-active').textContent = d.activeVehicles;
+    document.getElementById('d-avail-note').textContent = 'out of ' + d.totalSlots + ' total';
+    document.getElementById('d-occ-pct').textContent = Math.round(d.occupied/d.totalSlots*100) + '% full';
+    document.getElementById('d-completed').textContent = d.totalCompleted + ' sessions completed';
+    document.getElementById('hdr-avail').textContent = d.available;
+    document.getElementById('hdr-occ').textContent = d.occupied;
+    document.getElementById('hdr-rev').textContent = 'Rs. ' + d.totalRevenue.toFixed(0);
+
+    const bars = [
+      {label:'Small',  avail:d.smallAvail,  total:15},
+      {label:'Medium', avail:d.mediumAvail, total:30},
+      {label:'Large',  avail:d.largeAvail,  total:15},
+    ];
+    document.getElementById('occ-bars').innerHTML = bars.map(b => {
+      const occ = b.total - b.avail;
+      const pct = Math.round(occ/b.total*100);
+      return `<div class="occ-row">
+        <div class="occ-lbl">${b.label}</div>
+        <div class="occ-bar"><div class="occ-fill" style="width:${pct}%"></div></div>
+        <div class="occ-pct">${pct}%</div>
+        <div class="text-muted">${occ}/${b.total}</div>
+      </div>`;
+    }).join('');
+
+    document.getElementById('special-status').innerHTML = `
+      <div>
+        <div class="stat-label" style="margin-bottom:6px;">EV Charging Slots</div>
+        <div style="font-size:22px;font-weight:700;color:#00695c;">${d.evAvail} available</div>
+        <div class="text-muted mt-10">Priority assigned to Electric Cars</div>
+      </div>
+      <div>
+        <div class="stat-label" style="margin-bottom:6px;">Handicapped Slots</div>
+        <div style="font-size:22px;font-weight:700;color:#4527a0;">${d.handicappedAvail} available</div>
+        <div class="text-muted mt-10">Located near entrance (Ground Floor)</div>
+      </div>`;
+  } catch(e) {
+    document.getElementById('d-avail').textContent = 'Error';
+  }
+}
+
+// CHECK IN
+function selectType(el, type) {
+  selectedType = type;
+  document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  loadAvailPreview();
+}
+
+async function loadAvailPreview() {
+  try {
+    const r = await apGet('/slots');
+    if (r.status !== 'success') return;
+    const sizeMap = {CAR:'MEDIUM',MOTORCYCLE:'SMALL',TRUCK:'LARGE',ELECTRIC_CAR:'MEDIUM',HANDICAPPED:'MEDIUM'};
+    const needed = sizeMap[selectedType];
+    const avail = r.data.filter(s => s.status==='AVAILABLE');
+    const suitable = avail.filter(s => s.size===needed || (needed!=='LARGE' && s.size==='LARGE'));
+
+    if (!suitable.length) {
+      document.getElementById('avail-preview').innerHTML =
+        '<div class="alert alert-error">No suitable slots available for this vehicle type.</div>';
+      return;
+    }
+    const rows = suitable.slice(0,8).map(s=>`
+      <tr>
+        <td class="mono">${s.slotId}</td><td>Floor ${s.floor}</td><td>${s.size}</td>
+        <td>${s.isEVCharging?'<span class="badge badge-ev">EV</span>':''}${s.isHandicapped?'<span class="badge badge-handi">H</span>':''}${!s.isEVCharging&&!s.isHandicapped?'<span class="text-muted">-</span>':''}</td>
+      </tr>`).join('');
+    document.getElementById('avail-preview').innerHTML = `
+      <div class="text-muted" style="margin-bottom:10px;">${suitable.length} slot(s) available for <strong>${selectedType.replace('_',' ')}</strong></div>
+      <table><thead><tr><th>Slot ID</th><th>Floor</th><th>Size</th><th>Special</th></tr></thead><tbody>${rows}</tbody></table>
+      ${suitable.length>8?`<div class="text-muted mt-10">... and ${suitable.length-8} more</div>`:''}`;
+  } catch(e) {}
+}
+
+async function doCheckIn() {
+  const plate = document.getElementById('ci-plate').value.trim().toUpperCase();
+  const owner = document.getElementById('ci-owner').value.trim();
+  const phone = document.getElementById('ci-phone').value.trim();
+  if (!plate) { showAlert('ci-alert','License plate is required.','error'); return; }
+  if (!owner) { showAlert('ci-alert','Owner name is required.','error'); return; }
+  try {
+    const r = await apPost('/checkin',{vehicleType:selectedType,licensePlate:plate,ownerName:owner,ownerPhone:phone||'N/A'});
+    if (r.status==='success') {
+      showAlert('ci-alert','Vehicle checked in. Ticket: '+r.data.ticketId,'success');
+      showTicketModal(r.data,'checkin');
+      clearCheckIn(); loadAvailPreview(); loadDashboard();
+    } else { showAlert('ci-alert',r.message,'error'); }
+  } catch(e) { showAlert('ci-alert','Cannot connect to server. Make sure Java server is running on port 8080.','error'); }
+}
+function clearCheckIn() {
+  document.getElementById('ci-plate').value='';
+  document.getElementById('ci-owner').value='';
+  document.getElementById('ci-phone').value='';
+}
+
+// CHECK OUT
+async function findForCheckout() {
+  const ticketId = document.getElementById('co-ticket').value.trim();
+  const plate = document.getElementById('co-plate').value.trim().toUpperCase();
+  if (!ticketId && !plate) { showAlert('co-alert','Enter a ticket ID or license plate.','error'); return; }
+  try {
+    let ticket = null;
+    if (plate) {
+      const r = await apGet('/find?plate='+encodeURIComponent(plate));
+      if (r.status==='success') ticket=r.data;
+      else { showAlert('co-alert',r.message,'error'); return; }
+    } else {
+      const r = await apGet('/active');
+      if (r.status==='success') ticket=r.data.find(t=>t.ticketId===ticketId);
+      if (!ticket) { showAlert('co-alert','Ticket not found or already checked out.','error'); return; }
+    }
+    checkoutTicketId = ticket.ticketId;
+    document.getElementById('co-ticket').value = ticket.ticketId;
+    document.getElementById('co-btn').disabled = false;
+    document.getElementById('co-detail-card').style.display = '';
+    showAlert('co-alert','','');
+    document.getElementById('co-detail-body').innerHTML = `
+      <div class="receipt">
+        <div class="receipt-row"><span class="receipt-key">Ticket ID</span><span class="receipt-val mono">${ticket.ticketId}</span></div>
+        <div class="receipt-row"><span class="receipt-key">License Plate</span><span class="receipt-val">${ticket.licensePlate}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Owner</span><span class="receipt-val">${ticket.ownerName}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Vehicle Type</span><span class="receipt-val">${ticket.vehicleType}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Slot</span><span class="receipt-val">${ticket.slotId}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Entry Time</span><span class="receipt-val">${ticket.entryTime}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Duration</span><span class="receipt-val">${fmtDur(ticket.durationMinutes)}</span></div>
+        <hr class="receipt-divider"/>
+        <div class="receipt-row"><span class="receipt-key">Estimated Fee</span><span class="receipt-val receipt-total">Rs. ${ticket.estimatedFee.toFixed(2)}</span></div>
+      </div>`;
+  } catch(e) { showAlert('co-alert','Server error. Is the Java server running?','error'); }
+}
+
+async function doCheckOut() {
+  if (!checkoutTicketId) return;
+  try {
+    const r = await apPost('/checkout',{ticketId:checkoutTicketId});
+    if (r.status==='success') {
+      showAlert('co-alert','Checkout successful. Amount paid: Rs. '+r.data.amountPaid.toFixed(2),'success');
+      showTicketModal(r.data,'checkout');
+      checkoutTicketId=null;
+      document.getElementById('co-ticket').value='';
+      document.getElementById('co-plate').value='';
+      document.getElementById('co-btn').disabled=true;
+      document.getElementById('co-detail-card').style.display='none';
+      loadDashboard();
+    } else { showAlert('co-alert',r.message,'error'); }
+  } catch(e) { showAlert('co-alert','Server error.','error'); }
+}
+
+// FIND
+async function doFind() {
+  const plate = document.getElementById('fv-plate').value.trim().toUpperCase();
+  if (!plate) return;
+  try {
+    const r = await apGet('/find?plate='+encodeURIComponent(plate));
+    const el = document.getElementById('fv-result');
+    if (r.status==='success') {
+      const t=r.data;
+      el.innerHTML = `<div class="receipt" style="max-width:500px;">
+        <div class="receipt-heading">Vehicle Found</div>
+        <div class="receipt-row"><span class="receipt-key">License Plate</span><span class="receipt-val">${t.licensePlate}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Owner</span><span class="receipt-val">${t.ownerName}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Phone</span><span class="receipt-val">${t.ownerPhone}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Vehicle Type</span><span class="receipt-val">${t.vehicleType}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Ticket ID</span><span class="receipt-val mono">${t.ticketId}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Slot</span><span class="receipt-val">${t.slotId}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Entry Time</span><span class="receipt-val">${t.entryTime}</span></div>
+        <div class="receipt-row"><span class="receipt-key">Duration</span><span class="receipt-val">${fmtDur(t.durationMinutes)}</span></div>
+        <hr class="receipt-divider"/>
+        <div class="receipt-row"><span class="receipt-key">Current Fee</span><span class="receipt-val receipt-total">Rs. ${t.estimatedFee.toFixed(2)}</span></div>
+      </div>`;
+    } else { el.innerHTML=`<div class="alert alert-error">No active vehicle found with plate: ${plate}</div>`; }
+  } catch(e) { document.getElementById('fv-result').innerHTML='<div class="alert alert-error">Server connection error.</div>'; }
+}
+
+// MAP
+async function loadSlots() {
+  try {
+    const r = await apGet('/slots');
+    if (r.status!=='success') return;
+    allSlots=r.data; renderMap(currentFloor);
+  } catch(e) {}
+}
+function switchFloor(f,el) {
+  currentFloor=f;
+  document.querySelectorAll('.floor-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderMap(f);
+}
+function renderMap(floor) {
+  const slots=allSlots.filter(s=>s.floor===floor);
+  document.getElementById('slot-map').innerHTML=slots.map(s=>{
+    let cls='avail';
+    if (s.status==='OCCUPIED') cls='occ';
+    else if (s.isEVCharging) cls='ev-slot';
+    else if (s.isHandicapped) cls='handi';
+    return `<div class="slot-cell ${cls}" title="${s.slotId} | ${s.size} | ${s.status}">
+      <div class="sid">${s.slotId}</div><div class="stype">${s.size[0]}</div></div>`;
+  }).join('');
+}
+
+// ACTIVE
+async function loadActive() {
+  try {
+    const r=await apGet('/active');
+    if (r.status!=='success') return;
+    allActive=r.data; renderActive(allActive);
+  } catch(e) {}
+}
+function renderActive(data) {
+  const tb=document.getElementById('at-tbody');
+  if (!data.length) { tb.innerHTML='<tr><td colspan="9"><div class="empty-msg">No vehicles currently parked.</div></td></tr>'; return; }
+  tb.innerHTML=data.map(t=>`<tr>
+    <td class="mono">${t.ticketId}</td><td>${t.licensePlate}</td><td>${t.vehicleType}</td>
+    <td>${t.ownerName}</td><td>${t.slotId}</td><td>${t.entryTime}</td>
+    <td>${fmtDur(t.durationMinutes)}</td><td>Rs. ${t.estimatedFee.toFixed(0)}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="quickCheckout('${t.ticketId}')">Checkout</button></td>
+  </tr>`).join('');
+}
+function filterActive() {
+  const q=document.getElementById('at-search').value.toLowerCase();
+  renderActive(allActive.filter(t=>t.licensePlate.toLowerCase().includes(q)||t.ownerName.toLowerCase().includes(q)||t.slotId.toLowerCase().includes(q)||t.ticketId.toLowerCase().includes(q)));
+}
+function quickCheckout(ticketId) {
+  showPage('checkout', document.querySelectorAll('.nav-link')[2]);
+  document.getElementById('co-ticket').value=ticketId;
+  findForCheckout();
+}
+
+// HISTORY
+async function loadHistory() {
+  try {
+    const r=await apGet('/history');
+    if (r.status!=='success') return;
+    allHistory=r.data.reverse(); renderHistory(allHistory);
+  } catch(e) {}
+}
+function renderHistory(data) {
+  const tb=document.getElementById('hist-tbody');
+  if (!data.length) { tb.innerHTML='<tr><td colspan="8"><div class="empty-msg">No completed sessions yet.</div></td></tr>'; return; }
+  tb.innerHTML=data.map(t=>`<tr>
+    <td class="mono">${t.ticketId}</td><td>${t.licensePlate}</td><td>${t.slotId}</td>
+    <td>${t.entryTime}</td><td>${t.exitTime}</td><td>${fmtDur(t.durationMinutes)}</td>
+    <td>Rs. ${t.amountPaid.toFixed(2)}</td><td><span class="badge badge-paid">Paid</span></td>
+  </tr>`).join('');
+}
+function filterHistory() {
+  const q=document.getElementById('hist-search').value.toLowerCase();
+  renderHistory(allHistory.filter(t=>t.licensePlate.toLowerCase().includes(q)||t.slotId.toLowerCase().includes(q)||t.ticketId.toLowerCase().includes(q)));
+}
+
+// LOGS
+async function loadLogs() {
+  try {
+    const r=await apGet('/logs');
+    if (r.status!=='success') return;
+    const box=document.getElementById('log-box');
+    box.innerHTML=r.data.map(line=>{
+      let cls='';
+      if (line.includes('CHECK-IN')) cls='l-in';
+      else if (line.includes('CHECK-OUT')) cls='l-out';
+      else if (line.includes('ERROR')) cls='l-err';
+      else if (line.includes('SYSTEM')||line.includes('SERVER')) cls='l-sys';
+      else if (line.includes('MONITOR')) cls='l-mon';
+      return `<div class="${cls}">${esc(line)}</div>`;
+    }).join('');
+    box.scrollTop=box.scrollHeight;
+  } catch(e) { document.getElementById('log-box').innerHTML='<span class="l-err">Could not connect to Java server on localhost:8080</span>'; }
+}
+
+// MODAL
+function showTicketModal(t, type) {
+  const isIn = type==='checkin';
+  document.getElementById('modal-title').textContent = isIn ? 'Check-In Successful - Parking Ticket' : 'Payment Receipt';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="receipt">
+      <div class="receipt-heading">SMARTPARK PARKING LOT<br>
+        <span style="font-size:12px;font-weight:400;color:#888;">${t.ticketId}</span></div>
+      <div class="receipt-row"><span class="receipt-key">License Plate</span><span class="receipt-val">${t.licensePlate}</span></div>
+      <div class="receipt-row"><span class="receipt-key">Owner Name</span><span class="receipt-val">${t.ownerName}</span></div>
+      <div class="receipt-row"><span class="receipt-key">Vehicle Type</span><span class="receipt-val">${t.vehicleType}</span></div>
+      <div class="receipt-row"><span class="receipt-key">Parking Slot</span><span class="receipt-val">${t.slotId}</span></div>
+      <div class="receipt-row"><span class="receipt-key">Entry Time</span><span class="receipt-val">${t.entryTime}</span></div>
+      ${!isIn?`<div class="receipt-row"><span class="receipt-key">Exit Time</span><span class="receipt-val">${t.exitTime}</span></div>
+      <div class="receipt-row"><span class="receipt-key">Duration</span><span class="receipt-val">${fmtDur(t.durationMinutes)}</span></div>`:''}
+      <hr class="receipt-divider"/>
+      <div class="receipt-row">
+        <span class="receipt-key">${isIn?'Estimated Fee':'Amount Paid'}</span>
+        <span class="receipt-val receipt-total">Rs. ${isIn?t.estimatedFee.toFixed(2):t.amountPaid.toFixed(2)}</span>
+      </div>
+    </div>`;
+  document.getElementById('modal-bg').classList.add('open');
+}
+function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
+function printTicket() {
+  const html=document.getElementById('modal-body').innerHTML;
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><title>Parking Ticket</title>
+    <style>body{font-family:monospace;padding:30px;color:#000;}.receipt{border:1px solid #ccc;padding:20px;max-width:380px;}
+    .receipt-heading{text-align:center;font-weight:bold;margin-bottom:14px;border-bottom:1px dashed #ccc;padding-bottom:10px;}
+    .receipt-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+    .receipt-key{color:#666;}.receipt-val{font-weight:600;}.receipt-total{font-size:15px;font-weight:700;}
+    .receipt-divider{border-top:1px dashed #ccc;margin:10px 0;border-bottom:none;}</style>
+    </head><body>${html}</body></html>`);
+  w.print();
+}
+
+function fmtDur(mins) {
+  if (mins==null) return '--';
+  const h=Math.floor(mins/60), m=mins%60;
+  if (h===0) return m+' min';
+  return h+' hr '+(m>0?m+' min':'');
+}
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+setInterval(()=>{
+  const p=document.querySelector('.page.active')?.id;
+  if (p==='page-dashboard') loadDashboard();
+  if (p==='page-active') loadActive();
+  if (p==='page-map') loadSlots();
+}, 20000);
+
+loadDashboard();
+</script>
+</body>
+</html>

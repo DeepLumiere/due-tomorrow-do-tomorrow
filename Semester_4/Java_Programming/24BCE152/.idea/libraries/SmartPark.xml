@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SmartPark">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/parking-system/SmartPark.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
