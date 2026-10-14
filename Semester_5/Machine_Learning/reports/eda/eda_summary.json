@@ -1,0 +1,15 @@
+{
+  "total_documents": 973,
+  "total_gt_rows": 11894,
+  "mean_items_per_receipt": 2.58,
+  "median_items_per_receipt": 2.0,
+  "p95_items_per_receipt": 7.0,
+  "median_total_price": 45500.0,
+  "p99_total_price": 1565938.0,
+  "figures_saved": [
+    "reports\\eda\\dist_line_items.png",
+    "reports\\eda\\dist_grand_total_log.png",
+    "reports\\eda\\gt_field_frequencies.png",
+    "reports\\eda\\missing_rates.png"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "timestamp": "2026-10-05T13:19:02.391262+00:00",
+  "platform": {
+    "system": "Windows",
+    "release": "11",
+    "machine": "AMD64",
+    "python": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]"
+  },
+  "packages": {
+    "docling": "unknown",
+    "ollama": "unknown",
+    "duckdb": "1.5.6",
+    "pyarrow": "21.0.0",
+    "pydantic": "2.13.4",
+    "sklearn": "1.7.0",
+    "imblearn": "0.14.0",
+    "rapidfuzz": "3.14.6",
+    "gradio": "6.29.1",
+    "torch": "2.8.0+cu129"
+  },
+  "ollama_model": {
+    "model_name": "gemma3n:e2b",
+    "details": "  Model\n    architecture        gemma3n    \n    parameters          4.5B       \n    context length      32768      \n    embedding length    2048       \n    quantization        Q4_K_M     \n\n  Capabilities\n    completion    \n\n  License\n    Gemma Terms of Use               \n    Last modified: March 24, 2025    \n    ...                              \n\n"
+  },
+  "artifacts_produced": [
+    "data/processed/cord_docs.parquet",
+    "data/processed/cord_gt.parquet",
+    "data/processed/extractions_v1.jsonl",
+    "data/processed/labels_v1.parquet",
+    "data/processed/features_v1.parquet",
+    "models/verifier_v1.joblib",
+    "reports/data_audit.json",
+    "reports/metrics.json",
+    "reports/pr_roc_curves.png",
+    "reports/risk_coverage_curve.png",
+    "reports/calibration_curve.png",
+    "reports/final_report.md",
+    "models/model_card.md",
+    "docs/ai_usage_log.md"
+  ]
+}

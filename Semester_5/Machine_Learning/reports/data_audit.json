@@ -1,0 +1,1151 @@
+{
+  "dataset_metadata": {
+    "source": "naver-clova-ix/cord-v2",
+    "license": "CC-BY-4.0",
+    "description": "Consolidated Receipt Dataset (CORD) Indonesian receipts ground truth audit"
+  },
+  "splits_before_cleaning": {
+    "train": 800,
+    "val": 100,
+    "test": 100,
+    "total": 1000
+  },
+  "splits_after_cleaning": {
+    "train": 773,
+    "val": 100,
+    "test": 100,
+    "total": 973
+  },
+  "deduplication": {
+    "exact_duplicates_count": 2,
+    "near_duplicates_count": 78,
+    "cross_split_duplicates_count": 28,
+    "dropped_from_train_count": 27,
+    "dropped_from_train_ids": [
+      "cord_train_0006",
+      "cord_train_0015",
+      "cord_train_0044",
+      "cord_train_0056",
+      "cord_train_0084",
+      "cord_train_0107",
+      "cord_train_0133",
+      "cord_train_0221",
+      "cord_train_0234",
+      "cord_train_0251",
+      "cord_train_0283",
+      "cord_train_0325",
+      "cord_train_0353",
+      "cord_train_0354",
+      "cord_train_0420",
+      "cord_train_0426",
+      "cord_train_0428",
+      "cord_train_0483",
+      "cord_train_0489",
+      "cord_train_0589",
+      "cord_train_0627",
+      "cord_train_0648",
+      "cord_train_0733",
+      "cord_train_0765",
+      "cord_train_0766",
+      "cord_train_0785",
+      "cord_train_0797"
+    ],
+    "duplicate_pairs": [
+      {
+        "doc_a": "cord_train_0058",
+        "split_a": "train",
+        "doc_b": "cord_train_0109",
+        "split_b": "train",
+        "match_type": "exact_sha256",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0265",
+        "split_a": "train",
+        "doc_b": "cord_train_0285",
+        "split_b": "train",
+        "match_type": "exact_sha256",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0006",
+        "split_a": "train",
+        "doc_b": "cord_test_0095",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 2,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0015",
+        "split_a": "train",
+        "doc_b": "cord_val_0035",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0018",
+        "split_a": "train",
+        "doc_b": "cord_train_0679",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0022",
+        "split_a": "train",
+        "doc_b": "cord_train_0746",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0029",
+        "split_a": "train",
+        "doc_b": "cord_train_0256",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0034",
+        "split_a": "train",
+        "doc_b": "cord_train_0148",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0043",
+        "split_a": "train",
+        "doc_b": "cord_train_0263",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 2,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0044",
+        "split_a": "train",
+        "doc_b": "cord_test_0075",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0055",
+        "split_a": "train",
+        "doc_b": "cord_train_0663",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0056",
+        "split_a": "train",
+        "doc_b": "cord_val_0065",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0060",
+        "split_a": "train",
+        "doc_b": "cord_train_0626",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0066",
+        "split_a": "train",
+        "doc_b": "cord_train_0691",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0073",
+        "split_a": "train",
+        "doc_b": "cord_train_0566",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0078",
+        "split_a": "train",
+        "doc_b": "cord_train_0654",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0080",
+        "split_a": "train",
+        "doc_b": "cord_train_0164",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0084",
+        "split_a": "train",
+        "doc_b": "cord_val_0053",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0090",
+        "split_a": "train",
+        "doc_b": "cord_train_0723",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0095",
+        "split_a": "train",
+        "doc_b": "cord_train_0097",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0107",
+        "split_a": "train",
+        "doc_b": "cord_test_0086",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 2,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0110",
+        "split_a": "train",
+        "doc_b": "cord_train_0615",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0115",
+        "split_a": "train",
+        "doc_b": "cord_train_0207",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0118",
+        "split_a": "train",
+        "doc_b": "cord_train_0760",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0120",
+        "split_a": "train",
+        "doc_b": "cord_train_0578",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0127",
+        "split_a": "train",
+        "doc_b": "cord_train_0463",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0133",
+        "split_a": "train",
+        "doc_b": "cord_test_0025",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0141",
+        "split_a": "train",
+        "doc_b": "cord_train_0405",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0159",
+        "split_a": "train",
+        "doc_b": "cord_train_0593",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 2,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0195",
+        "split_a": "train",
+        "doc_b": "cord_train_0641",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0197",
+        "split_a": "train",
+        "doc_b": "cord_train_0215",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0204",
+        "split_a": "train",
+        "doc_b": "cord_train_0391",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0208",
+        "split_a": "train",
+        "doc_b": "cord_train_0533",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0209",
+        "split_a": "train",
+        "doc_b": "cord_train_0360",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0212",
+        "split_a": "train",
+        "doc_b": "cord_train_0227",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0221",
+        "split_a": "train",
+        "doc_b": "cord_val_0006",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0234",
+        "split_a": "train",
+        "doc_b": "cord_val_0030",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0238",
+        "split_a": "train",
+        "doc_b": "cord_train_0470",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0251",
+        "split_a": "train",
+        "doc_b": "cord_test_0050",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 2,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0255",
+        "split_a": "train",
+        "doc_b": "cord_train_0466",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0276",
+        "split_a": "train",
+        "doc_b": "cord_train_0732",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0281",
+        "split_a": "train",
+        "doc_b": "cord_train_0504",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0283",
+        "split_a": "train",
+        "doc_b": "cord_val_0028",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0295",
+        "split_a": "train",
+        "doc_b": "cord_train_0684",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0310",
+        "split_a": "train",
+        "doc_b": "cord_train_0665",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0325",
+        "split_a": "train",
+        "doc_b": "cord_val_0045",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0335",
+        "split_a": "train",
+        "doc_b": "cord_train_0646",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0353",
+        "split_a": "train",
+        "doc_b": "cord_val_0036",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 2,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0354",
+        "split_a": "train",
+        "doc_b": "cord_test_0079",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0379",
+        "split_a": "train",
+        "doc_b": "cord_train_0552",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0380",
+        "split_a": "train",
+        "doc_b": "cord_train_0798",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0418",
+        "split_a": "train",
+        "doc_b": "cord_train_0726",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0420",
+        "split_a": "train",
+        "doc_b": "cord_val_0098",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 2,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0426",
+        "split_a": "train",
+        "doc_b": "cord_test_0029",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0428",
+        "split_a": "train",
+        "doc_b": "cord_test_0044",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0438",
+        "split_a": "train",
+        "doc_b": "cord_train_0704",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0474",
+        "split_a": "train",
+        "doc_b": "cord_train_0753",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 2,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0477",
+        "split_a": "train",
+        "doc_b": "cord_train_0650",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0483",
+        "split_a": "train",
+        "doc_b": "cord_val_0097",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0485",
+        "split_a": "train",
+        "doc_b": "cord_train_0525",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0489",
+        "split_a": "train",
+        "doc_b": "cord_val_0067",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0531",
+        "split_a": "train",
+        "doc_b": "cord_train_0703",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0537",
+        "split_a": "train",
+        "doc_b": "cord_train_0792",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 2,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0546",
+        "split_a": "train",
+        "doc_b": "cord_train_0658",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0562",
+        "split_a": "train",
+        "doc_b": "cord_train_0636",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0589",
+        "split_a": "train",
+        "doc_b": "cord_test_0028",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0595",
+        "split_a": "train",
+        "doc_b": "cord_train_0764",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0627",
+        "split_a": "train",
+        "doc_b": "cord_val_0096",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0628",
+        "split_a": "train",
+        "doc_b": "cord_train_0698",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0639",
+        "split_a": "train",
+        "doc_b": "cord_train_0673",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0648",
+        "split_a": "train",
+        "doc_b": "cord_test_0067",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0677",
+        "split_a": "train",
+        "doc_b": "cord_train_0773",
+        "split_b": "train",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_train_0733",
+        "split_a": "train",
+        "doc_b": "cord_val_0089",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0765",
+        "split_a": "train",
+        "doc_b": "cord_test_0080",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0766",
+        "split_a": "train",
+        "doc_b": "cord_test_0069",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0785",
+        "split_a": "train",
+        "doc_b": "cord_test_0031",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_train_0797",
+        "split_a": "train",
+        "doc_b": "cord_test_0033",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      },
+      {
+        "doc_a": "cord_val_0016",
+        "split_a": "val",
+        "doc_b": "cord_val_0038",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_val_0027",
+        "split_a": "val",
+        "doc_b": "cord_val_0044",
+        "split_b": "val",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": false
+      },
+      {
+        "doc_a": "cord_val_0059",
+        "split_a": "val",
+        "doc_b": "cord_test_0038",
+        "split_b": "test",
+        "match_type": "near_phash",
+        "hash_dist": 0,
+        "cross_split": true
+      }
+    ]
+  },
+  "missing_value_rates": {
+    "document_fields": {
+      "subtotal_price": {
+        "present_count": 643,
+        "missing_count": 330,
+        "total_documents": 973,
+        "missing_rate_pct": 33.92
+      },
+      "discount_price": {
+        "present_count": 70,
+        "missing_count": 903,
+        "total_documents": 973,
+        "missing_rate_pct": 92.81
+      },
+      "service_price": {
+        "present_count": 118,
+        "missing_count": 855,
+        "total_documents": 973,
+        "missing_rate_pct": 87.87
+      },
+      "tax_price": {
+        "present_count": 423,
+        "missing_count": 550,
+        "total_documents": 973,
+        "missing_rate_pct": 56.53
+      },
+      "total_price": {
+        "present_count": 945,
+        "missing_count": 28,
+        "total_documents": 973,
+        "missing_rate_pct": 2.88
+      },
+      "cash_price": {
+        "present_count": 629,
+        "missing_count": 344,
+        "total_documents": 973,
+        "missing_rate_pct": 35.35
+      },
+      "change_price": {
+        "present_count": 606,
+        "missing_count": 367,
+        "total_documents": 973,
+        "missing_rate_pct": 37.72
+      },
+      "credit_card_price": {
+        "present_count": 149,
+        "missing_count": 824,
+        "total_documents": 973,
+        "missing_rate_pct": 84.69
+      },
+      "emoney_price": {
+        "present_count": 51,
+        "missing_count": 922,
+        "total_documents": 973,
+        "missing_rate_pct": 94.76
+      }
+    },
+    "line_item_fields": {
+      "description": {
+        "present_count": 2507,
+        "missing_count": 8,
+        "total_items": 2515,
+        "missing_rate_pct": 0.32
+      },
+      "quantity": {
+        "present_count": 2515,
+        "missing_count": 0,
+        "total_items": 2515,
+        "missing_rate_pct": 0.0
+      },
+      "unit_price": {
+        "present_count": 726,
+        "missing_count": 1789,
+        "total_items": 2515,
+        "missing_rate_pct": 71.13
+      },
+      "line_total": {
+        "present_count": 2497,
+        "missing_count": 18,
+        "total_items": 2515,
+        "missing_rate_pct": 0.72
+      },
+      "modifiers": {
+        "present_count": 217,
+        "missing_count": 2298,
+        "total_items": 2515,
+        "missing_rate_pct": 91.37
+      }
+    }
+  },
+  "outlier_analysis": {
+    "field_distributions": {
+      "total_price": {
+        "field": "total_price",
+        "count": 945,
+        "min": 57.0,
+        "max": 5583455800.0,
+        "mean": 6036971.3873015875,
+        "median": 45500.0,
+        "std": 181529781.65120226,
+        "q1_p25": 24000.0,
+        "q3_p75": 100000.0,
+        "iqr": 76000.0,
+        "lower_bound": -90000.0,
+        "upper_bound": 214000.0,
+        "p99_5": 2319743.9199999985,
+        "outlier_count_iqr": 124,
+        "outlier_count_p99_5": 5
+      },
+      "subtotal_price": {
+        "field": "subtotal_price",
+        "count": 643,
+        "min": 3100.0,
+        "max": 7363881002.0,
+        "mean": 29494092.220544327,
+        "median": 47727.0,
+        "std": 409833589.3768018,
+        "q1_p25": 25250.0,
+        "q3_p75": 117386.5,
+        "iqr": 92136.5,
+        "lower_bound": -112954.75,
+        "upper_bound": 255591.25,
+        "p99_5": 1583249799.9999278,
+        "outlier_count_iqr": 80,
+        "outlier_count_p99_5": 4
+      },
+      "line_total": {
+        "field": "line_total",
+        "count": 2497,
+        "min": -34363.0,
+        "max": 3600000.0,
+        "mean": 47101.79634761714,
+        "median": 24500.0,
+        "std": 119525.62818910721,
+        "q1_p25": 13000.0,
+        "q3_p75": 45000.0,
+        "iqr": 32000.0,
+        "lower_bound": -35000.0,
+        "upper_bound": 93000.0,
+        "p99_5": 579439.9999999985,
+        "outlier_count_iqr": 232,
+        "outlier_count_p99_5": 13
+      },
+      "unit_price": {
+        "field": "unit_price",
+        "count": 726,
+        "min": 0.0,
+        "max": 975000.0,
+        "mean": 28807.371900826445,
+        "median": 15000.0,
+        "std": 59901.87289862076,
+        "q1_p25": 8000.0,
+        "q3_p75": 28000.0,
+        "iqr": 20000.0,
+        "lower_bound": -22000.0,
+        "upper_bound": 58000.0,
+        "p99_5": 385000.0,
+        "outlier_count_iqr": 64,
+        "outlier_count_p99_5": 3
+      },
+      "quantity": {
+        "field": "quantity",
+        "count": 2515,
+        "min": 0.09,
+        "max": 48540.0,
+        "mean": 60.4601550695825,
+        "median": 1.0,
+        "std": 1574.2939681802136,
+        "q1_p25": 1.0,
+        "q3_p75": 1.0,
+        "iqr": 0.0,
+        "lower_bound": 1.0,
+        "upper_bound": 1.0,
+        "p99_5": 286.29999999999836,
+        "outlier_count_iqr": 454,
+        "outlier_count_p99_5": 13
+      }
+    },
+    "flagged_outliers_count": 39,
+    "flagged_outlier_samples": [
+      {
+        "doc_id": "cord_train_0062",
+        "split": "train",
+        "item_idx": 0,
+        "description": "RALPH BREAKS THE INTERNET : WR",
+        "quantity": 60.0,
+        "line_total": 3600000.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0085",
+        "split": "train",
+        "item_idx": 0,
+        "description": "Round Wagyu (1gr)",
+        "quantity": 118.0,
+        "line_total": 47200.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0088",
+        "split": "train",
+        "item_idx": 0,
+        "description": "KUE PILUS ASIN",
+        "quantity": 80.0,
+        "line_total": 16800.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0088",
+        "split": "train",
+        "item_idx": 1,
+        "description": "KACANG MEDAN",
+        "quantity": 95.0,
+        "line_total": 28690.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0126",
+        "split": "train",
+        "item_idx": 0,
+        "description": "Round Wagyu ( 1gr )",
+        "quantity": 133.0,
+        "line_total": 53200.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0135",
+        "split": "train",
+        "item_idx": 0,
+        "description": "IKAN GABUS FRESH",
+        "quantity": 264.0,
+        "line_total": 26004.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0135",
+        "split": "train",
+        "item_idx": 1,
+        "description": "IKAN BUMBU KUNING",
+        "quantity": 308.0,
+        "line_total": 22330.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0138",
+        "split": "train",
+        "item_idx": 2,
+        "description": "WELL TORI KARAAGE MU",
+        "quantity": 100.0,
+        "line_total": 58000.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0141",
+        "split": "train",
+        "item_idx": 0,
+        "description": "HOME CHARGER+KABEL 138 IP5 TS C",
+        "quantity": 1000.0,
+        "line_total": 130000.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0149",
+        "split": "train",
+        "item_idx": 6,
+        "description": "DAUN SEREH",
+        "quantity": 292.0,
+        "line_total": 5811.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0152",
+        "split": "train",
+        "item_idx": 0,
+        "description": "WACOM BAMBOO PEN",
+        "quantity": 1.0,
+        "line_total": 975000.0,
+        "reason": "line_total > p99.5 (579440.00)"
+      },
+      {
+        "doc_id": "cord_train_0193",
+        "split": "train",
+        "item_idx": 5,
+        "description": "JOIE KUBBIE(BABY BOX)",
+        "quantity": 1.0,
+        "line_total": 1100000.0,
+        "reason": "line_total > p99.5 (579440.00)"
+      },
+      {
+        "doc_id": "cord_train_0219",
+        "split": "train",
+        "item_idx": 0,
+        "description": "EDAMAME",
+        "quantity": 512.0,
+        "line_total": 11520.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0219",
+        "split": "train",
+        "item_idx": 3,
+        "description": "CABE KERITING CURA",
+        "quantity": 74.0,
+        "line_total": 3323.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0219",
+        "split": "train",
+        "item_idx": 4,
+        "description": "TOMAT CURAH",
+        "quantity": 198.0,
+        "line_total": 3267.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0219",
+        "split": "train",
+        "item_idx": 6,
+        "description": "CUMI BANGKA",
+        "quantity": 282.0,
+        "line_total": 28736.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0310",
+        "split": "train",
+        "item_idx": 0,
+        "description": "MANUKA HONEY",
+        "quantity": 2.0,
+        "line_total": 770000.0,
+        "reason": "line_total > p99.5 (579440.00)"
+      },
+      {
+        "doc_id": "cord_train_0332",
+        "split": "train",
+        "item_idx": 3,
+        "description": "FILLET DORI",
+        "quantity": 354.0,
+        "line_total": 26019.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0405",
+        "split": "train",
+        "item_idx": 0,
+        "description": "HOME CHARGER+KABEL 138 IP5 TS C",
+        "quantity": 1000.0,
+        "line_total": 130000.0,
+        "reason": "quantity > 50"
+      },
+      {
+        "doc_id": "cord_train_0490",
+        "split": "train",
+        "item_idx": 0,
+        "description": "Bio Solar",
+        "quantity": 48540.0,
+        "line_total": 250000.0,
+        "reason": "quantity > 50"
+      }
+    ]
+  },
+  "line_item_stats": {
+    "total_valid_line_items": 2515,
+    "total_void_line_items": 1,
+    "receipts_with_menu_count": 973,
+    "receipts_without_menu_count": 0,
+    "items_per_receipt": {
+      "min": 1,
+      "max": 22,
+      "mean": 2.5847893114080165,
+      "median": 2.0,
+      "p95": 7.0
+    }
+  }
+}

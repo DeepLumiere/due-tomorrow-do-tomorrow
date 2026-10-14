@@ -1,0 +1,30 @@
+{
+  "vendor_name": "KOPI KENANGAN",
+  "invoice_number": "INV-2023-0091",
+  "invoice_date": "2023-04-12",
+  "currency": "Rp",
+  "line_items": [
+    {
+      "description": "Kopi Kenangan Mantan (R)",
+      "quantity": "2",
+      "unit_price": "18.000",
+      "line_total": "36.000",
+      "modifiers": ["Less Sugar", "No Ice"]
+    },
+    {
+      "description": "Roti Coklat Klasik",
+      "quantity": "1",
+      "unit_price": "12.000",
+      "line_total": "12.000",
+      "modifiers": []
+    }
+  ],
+  "subtotal": "48.000",
+  "discount": null,
+  "service_charge": null,
+  "tax": "4.800",
+  "total": "52.800",
+  "payment_method": "e-money",
+  "amount_paid": "52.800",
+  "change": "0"
+}
