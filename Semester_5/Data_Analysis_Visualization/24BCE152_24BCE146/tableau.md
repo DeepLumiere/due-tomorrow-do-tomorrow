@@ -4,7 +4,7 @@
 **Primary Dataset:** `data/preprocessed_categorical_preserved.csv` (13,214 encounters × 118 columns)  
 **Engineering Pipeline:** `code/Data_Preprocessing.ipynb` (Enhanced Upfront)  
 **Secondary Reference:** `data/preprocessed_full_encoded.csv` (13,214 encounters × 119 features)
-**Dataset Source:** [Kaggle/DeepLumiere](https://www.kaggle.com/datasets/deeplumiere/hospital-management-data) 
+
 ---
 
 ## 📑 Table of Contents
