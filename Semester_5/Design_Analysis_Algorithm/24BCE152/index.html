@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seam Carving</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --border-hover: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-sub: #94a3b8;
+      --primary: #0f172a;
+      --primary-hover: #1e293b;
+      --blue: #2563eb;
+      --blue-subtle: #eff6ff;
+      --green: #10b981;
+      --radius: 12px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 1.1rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-main);
+    }
+
+    .header-status {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    main {
+      flex: 1;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 2.5rem 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    /* Comparison Section */
+    .compare-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 860px) {
+      .compare-container { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 440px;
+      position: relative;
+    }
+
+    .panel-header {
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+    }
+
+    .panel-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .panel-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.775rem;
+      color: var(--text-muted);
+      background: var(--bg);
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .panel-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      position: relative;
+      background: #fafbfc;
+      min-height: 380px;
+    }
+
+    /* Input Upload Area */
+    .upload-box {
+      width: 100%;
+      height: 100%;
+      min-height: 340px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      background: #ffffff;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-box:hover, .upload-box.dragover {
+      border-color: var(--blue);
+      background: var(--blue-subtle);
+    }
+
+    .upload-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.75rem;
+      padding: 2rem;
+    }
+
+    .upload-empty-state svg {
+      width: 44px;
+      height: 44px;
+      color: var(--text-sub);
+    }
+
+    .upload-empty-state p {
+      font-size: 0.925rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .upload-empty-state span {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+    }
+
+    .preview-img {
+      max-width: 100%;
+      max-height: 360px;
+      object-fit: contain;
+      border-radius: 4px;
+      display: none;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Hover overlay on input box */
+    .hover-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.65);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .upload-box.has-image:hover .hover-overlay {
+      opacity: 1;
+    }
+
+    /* Index Selector Bar under Input */
+    .index-options-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+
+    .index-label {
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-right: 0.25rem;
+    }
+
+    .index-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 0.3rem 0.65rem;
+      border-radius: 5px;
+      font-size: 0.775rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .index-btn:hover {
+      background: #ffffff;
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+    .index-btn.active {
+      background: var(--text-main);
+      color: #ffffff;
+      border-color: var(--text-main);
+    }
+
+    /* Output Box */
+    .output-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.5rem;
+      color: var(--text-sub);
+    }
+
+    .output-empty-state svg {
+      width: 40px;
+      height: 40px;
+    }
+
+    .output-views-container {
+      width: 100%;
+      height: 100%;
+      min-height: 340px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #ffffff;
+      border: 1px solid var(--border);
+    }
+
+    .output-views-container img {
+      max-width: 100%;
+      max-height: 360px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    /* Output Hover Download Overlay */
+    .output-hover-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.65);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 5;
+    }
+
+    .output-views-container:hover .output-hover-overlay {
+      opacity: 1;
+    }
+
+    .btn-download-overlay {
+      background: #ffffff;
+      color: var(--text-main);
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      text-decoration: none;
+      transition: transform 0.15s ease;
+    }
+    .btn-download-overlay:hover {
+      transform: scale(1.03);
+    }
+
+    /* View Switcher */
+    .view-switcher {
+      display: none;
+      gap: 0.25rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px;
+    }
+
+    .switch-btn {
+      background: transparent;
+      border: none;
+      font-size: 0.775rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .switch-btn.active {
+      background: #ffffff;
+      color: var(--text-main);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Parameters Bar */
+    .action-bar {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 1.4rem 1.75rem;
+      display: none;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .sliders-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 860px) {
+      .sliders-grid { grid-template-columns: 1fr; gap: 1rem; }
+    }
+
+    .slider-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .slider-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.825rem;
+      font-weight: 500;
+    }
+
+    .slider-val {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--text-main);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .controls-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .method-select-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .method-select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.825rem;
+      color: var(--text-main);
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .method-select:focus {
+      border-color: var(--blue);
+    }
+
+    /* Lock Ratio Switch */
+    .ratio-lock-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.825rem;
+      font-weight: 500;
+      color: var(--text-main);
+      user-select: none;
+      cursor: pointer;
+      padding: 0.45rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      white-space: nowrap;
+    }
+
+    .ratio-lock-box input[type="checkbox"] {
+      accent-color: var(--text-main);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-size: 0.825rem;
+      font-weight: 600;
+      padding: 0.65rem 1rem;
+      border-radius: 7px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: #ffffff;
+      border-color: var(--border-hover);
+      color: var(--blue);
+    }
+    .btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-submit {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.15s ease, transform 0.1s ease;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Stats Panel */
+    .stats-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      display: none;
+    }
+
+    .stats-card-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    @media (max-width: 900px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 500px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+
+    .stat-box {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      border-right: 1px solid var(--border);
+    }
+
+    .stat-box:last-child {
+      border-right: none;
+    }
+
+    .stat-label {
+      font-size: 0.775rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .stat-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .stat-desc {
+      font-size: 0.775rem;
+      color: var(--text-muted);
+    }
+
+    .stat-desc.highlight {
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    /* Loading Spinner */
+    .loader-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(2px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.85rem;
+      z-index: 10;
+    }
+
+    .loader-overlay.active { display: flex; }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e2e8f0;
+      border-top-color: var(--text-main);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-title">Seam Carving</div>
+    <div class="header-status" id="headerStatus">Ready</div>
+  </header>
+
+  <main>
+    <!-- Comparison Container: Input & Output -->
+    <div class="compare-container">
+
+      <!-- Left Panel: Input Image -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-label">Input</span>
+          <span class="panel-badge" id="badgeInput">Empty</span>
+        </div>
+        <div class="panel-body">
+          <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" style="display:none">
+          <div class="upload-box" id="uploadBox">
+            <div class="upload-empty-state" id="emptyState">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <p>Click to upload image or drag and drop</p>
+              <span>PNG, JPG, or WEBP</span>
+            </div>
+            <img id="inputPreview" class="preview-img" alt="Input Preview">
+            <div class="hover-overlay" id="hoverOverlay">
+              <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+              </svg>
+              <span>Click to replace image</span>
+            </div>
+          </div>
+        </div>
+        <!-- Input Sample Index Options -->
+        
+      </div>
+
+      <!-- Right Panel: Output Image -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-label">Output</span>
+          <div class="view-switcher" id="viewSwitcher">
+            <button class="switch-btn active" onclick="switchOutputView('compressed')">Resized</button>
+            <button class="switch-btn" onclick="switchOutputView('overlay')">Seams</button>
+            <button class="switch-btn" onclick="switchOutputView('energy')">Energy</button>
+          </div>
+          <span class="panel-badge" id="badgeOutput">Awaiting Input</span>
+        </div>
+        <div class="panel-body">
+          <div class="loader-overlay" id="loaderOverlay">
+            <div class="spinner"></div>
+            <span style="font-size:0.85rem; color:var(--text-muted); font-weight:500;">Loading...</span>
+          </div>
+
+          <div class="output-empty-state" id="outputEmpty">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <p style="font-size:0.875rem;">Processed result will appear here</p>
+          </div>
+
+          <div class="output-views-container" id="outputContainer">
+            <img id="outCompressed" alt="Resized Result" style="display:block;">
+            <img id="outOverlay" alt="Seams Overlay" style="display:none;">
+            <img id="outEnergy" alt="Energy Landscape" style="display:none;">
+
+            <!-- On-hover Download Button in Output Panel -->
+            <div class="output-hover-overlay">
+              <a id="downloadLinkHover" class="btn-download-overlay" download="carved_output.png">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                <span>Download Output PNG</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Parameter & Execution Bar -->
+    <div class="action-bar" id="actionBar">
+      <div class="sliders-grid">
+        <div class="slider-item">
+          <div class="slider-meta">
+            <span>Width Reduction (Vertical)</span>
+            <span class="slider-val" id="valSeamsV">40 px</span>
+          </div>
+          <input type="range" id="inputSeamsV" min="0" max="150" value="40" oninput="onWidthSlider()" onchange="executeCarve()">
+        </div>
+
+        <div class="slider-item">
+          <div class="slider-meta">
+            <span>Height Reduction (Horizontal)</span>
+            <span class="slider-val" id="valSeamsH">0 px</span>
+          </div>
+          <input type="range" id="inputSeamsH" min="0" max="100" value="0" oninput="onHeightSlider()" onchange="executeCarve()">
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <div class="controls-left">
+          <!-- Lock Aspect Ratio Option -->
+          <label class="ratio-lock-box" title="Maintain original aspect ratio while carving">
+            <input type="checkbox" id="chkLockRatio" onchange="toggleLockRatio()">
+            <span>Lock Ratio</span>
+          </label>
+        </div>
+
+        <div class="controls-right">
+          <button class="btn-secondary" id="btnReset" onclick="resetToOriginal()" title="Reset reduction sliders to 0">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            <span>Reset</span>
+          </button>
+
+          <button class="btn-secondary" id="btnUseOutput" onclick="useOutputAsInput()" title="Set current output as new input image to carve iteratively">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+            </svg>
+            <span>Use Output as Input</span>
+          </button>
+
+          <button class="btn-submit" id="btnCarve" onclick="executeCarve()">
+            <span>Process Image</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-card" id="statsCard">
+      <div class="stats-card-header">
+        <span>Resizing Statistics</span>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <span class="stat-label">Resolution</span>
+          <span class="stat-val" id="statRes">—</span>
+          <span class="stat-desc" id="statResDesc">—</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Pixels Removed</span>
+          <span class="stat-val" id="statPixels">—</span>
+          <span class="stat-desc highlight" id="statPixelPct">—</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">File Size</span>
+          <span class="stat-val" id="statBytes">—</span>
+          <span class="stat-desc" id="statByteDesc">—</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-label">Processing Time</span>
+          <span class="stat-val" id="statTime">—</span>
+          <span class="stat-desc highlight" id="statThroughput">—</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let uploadedFile = null;
+    let originalWidth = 0;
+    let originalHeight = 0;
+    let lockRatio = false;
+
+    const uploadBox = document.getElementById('uploadBox');
+    const fileInput = document.getElementById('fileInput');
+    const emptyState = document.getElementById('emptyState');
+    const inputPreview = document.getElementById('inputPreview');
+    const badgeInput = document.getElementById('badgeInput');
+    const actionBar = document.getElementById('actionBar');
+
+    uploadBox.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        document.querySelectorAll('.index-btn').forEach(btn => btn.classList.remove('active'));
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    uploadBox.addEventListener('dragover', (e) => { e.preventDefault(); uploadBox.classList.add('dragover'); });
+    uploadBox.addEventListener('dragleave', () => uploadBox.classList.remove('dragover'));
+    uploadBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadBox.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        document.querySelectorAll('.index-btn').forEach(btn => btn.classList.remove('active'));
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    async function loadSampleByIndex(idx) {
+      document.querySelectorAll('.index-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', i + 1 === idx);
+      });
+
+      const res = await fetch(`/api/preset/${idx}`);
+      const blob = await res.blob();
+      const file = new File([blob], `sample_${idx}.png`, { type: 'image/png' });
+      handleFile(file, `Index #${idx}`);
+    }
+
+    function handleFile(file, indexLabel = null) {
+      uploadedFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          originalWidth = img.width;
+          originalHeight = img.height;
+
+          inputPreview.src = e.target.result;
+          inputPreview.style.display = 'block';
+          emptyState.style.display = 'none';
+          uploadBox.classList.add('has-image');
+
+          badgeInput.textContent = indexLabel ? `${indexLabel} (${originalWidth} × ${originalHeight} px)` : `${originalWidth} × ${originalHeight} px`;
+
+          const maxV = Math.max(1, Math.floor(originalWidth * 0.5));
+          const maxH = Math.max(0, Math.floor(originalHeight * 0.5));
+
+          const inputV = document.getElementById('inputSeamsV');
+          const inputH = document.getElementById('inputSeamsH');
+
+          inputV.max = maxV;
+          inputV.value = Math.min(40, maxV);
+
+          inputH.max = maxH;
+          inputH.value = 0;
+
+          updateSliderLabels();
+          actionBar.style.display = 'flex';
+
+          executeCarve();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function resetToOriginal() {
+      if (!uploadedFile) return;
+      document.getElementById('inputSeamsV').value = 0;
+      document.getElementById('inputSeamsH').value = 0;
+      updateSliderLabels();
+      executeCarve();
+    }
+
+    function useOutputAsInput() {
+      const compImg = document.getElementById('outCompressed');
+      if (!compImg || !compImg.src || !compImg.src.startsWith('data:')) {
+        alert("No carved output available to chain yet.");
+        return;
+      }
+      fetch(compImg.src)
+        .then(res => res.blob())
+        .then(blob => {
+          const file = new File([blob], 'carved_base.png', { type: 'image/png' });
+          document.querySelectorAll('.index-btn').forEach(btn => btn.classList.remove('active'));
+          handleFile(file, 'Chained Base');
+        })
+        .catch(err => {
+          console.error("Failed to chain output as input:", err);
+        });
+    }
+
+    function toggleLockRatio() {
+      lockRatio = document.getElementById('chkLockRatio').checked;
+      if (lockRatio) {
+        syncRatioFromWidth();
+        executeCarve();
+      }
+    }
+
+    function onWidthSlider() {
+      if (lockRatio && originalWidth > 0 && originalHeight > 0) {
+        syncRatioFromWidth();
+      }
+      updateSliderLabels();
+    }
+
+    function onHeightSlider() {
+      if (lockRatio && originalWidth > 0 && originalHeight > 0) {
+        syncRatioFromHeight();
+      }
+      updateSliderLabels();
+    }
+
+    function syncRatioFromWidth() {
+      const v = parseInt(document.getElementById('inputSeamsV').value) || 0;
+      const newW = originalWidth - v;
+      const targetH = Math.round(newW * (originalHeight / originalWidth));
+      const newH = Math.max(0, originalHeight - targetH);
+      const inputH = document.getElementById('inputSeamsH');
+      inputH.value = Math.min(inputH.max, Math.max(0, newH));
+      updateSliderLabels();
+    }
+
+    function syncRatioFromHeight() {
+      const h = parseInt(document.getElementById('inputSeamsH').value) || 0;
+      const newH = originalHeight - h;
+      const targetW = Math.round(newH * (originalWidth / originalHeight));
+      const newW = Math.max(0, originalWidth - targetW);
+      const inputV = document.getElementById('inputSeamsV');
+      inputV.value = Math.min(inputV.max, Math.max(0, newW));
+      updateSliderLabels();
+    }
+
+    function updateSliderLabels() {
+      const v = parseInt(document.getElementById('inputSeamsV').value) || 0;
+      const h = parseInt(document.getElementById('inputSeamsH').value) || 0;
+      const targetW = originalWidth > 0 ? Math.max(1, originalWidth - v) : null;
+      const targetH = originalHeight > 0 ? Math.max(1, originalHeight - h) : null;
+      document.getElementById('valSeamsV').textContent = targetW !== null 
+        ? `${v} px (Target: ${targetW} px)` 
+        : `${v} px`;
+      document.getElementById('valSeamsH').textContent = targetH !== null 
+        ? `${h} px (Target: ${targetH} px)` 
+        : `${h} px`;
+    }
+
+    async function executeCarve() {
+      if (!uploadedFile) return;
+
+      const loader = document.getElementById('loaderOverlay');
+      const btn = document.getElementById('btnCarve');
+      loader.classList.add('active');
+      btn.disabled = true;
+      const statusEl = document.getElementById('headerStatus');
+      if (statusEl) statusEl.textContent = 'Loading...';
+
+      try {
+        const formData = new FormData();
+        formData.append('file', uploadedFile);
+        formData.append('seams_v', document.getElementById('inputSeamsV').value);
+        formData.append('seams_h', document.getElementById('inputSeamsH').value);
+
+        const res = await fetch('/api/carve', { method: 'POST', body: formData });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+
+        document.getElementById('outputEmpty').style.display = 'none';
+        document.getElementById('outputContainer').style.display = 'flex';
+        document.getElementById('viewSwitcher').style.display = 'flex';
+
+        document.getElementById('outCompressed').src = data.images.compressed;
+        document.getElementById('outOverlay').src = data.images.seam_overlay;
+        document.getElementById('outEnergy').src = data.images.energy_initial;
+
+        document.getElementById('downloadLinkHover').href = data.images.compressed;
+
+        const m = data.metrics;
+        originalWidth = m.original_width;
+        originalHeight = m.original_height;
+        updateSliderLabels();
+
+        document.getElementById('badgeOutput').textContent = `${m.compressed_width} × ${m.compressed_height} px`;
+
+        // Update Stats Cards
+        document.getElementById('statRes').textContent = `${m.compressed_width} × ${m.compressed_height}`;
+        document.getElementById('statResDesc').textContent = `From ${m.original_width} × ${m.original_height} (-${m.vertical_seams_removed}w, -${m.horizontal_seams_removed}h)`;
+
+        document.getElementById('statPixels').textContent = m.total_pixels_removed.toLocaleString();
+        document.getElementById('statPixelPct').textContent = `-${m.pixel_reduction_percent}% reduction`;
+
+        const kbComp = (m.compressed_bytes_png / 1024).toFixed(1);
+        const kbOrig = (m.original_bytes_png / 1024).toFixed(1);
+        document.getElementById('statBytes').textContent = `${kbComp} KB`;
+        document.getElementById('statByteDesc').textContent = `${kbOrig} KB initial (${m.byte_compression_ratio}% of initial)`;
+
+        document.getElementById('statTime').textContent = `${(m.total_time_seconds * 1000).toFixed(0)} ms`;
+        document.getElementById('statThroughput').textContent = `${m.seams_per_second} seams/sec`;
+
+        document.getElementById('statsCard').style.display = 'block';
+        document.getElementById('headerStatus').textContent = 'Complete';
+
+      } catch (err) {
+        alert("Carving failed: " + err.message);
+        document.getElementById('headerStatus').textContent = 'Error';
+      } finally {
+        loader.classList.remove('active');
+        btn.disabled = false;
+      }
+    }
+
+    function switchOutputView(view) {
+      document.querySelectorAll('.switch-btn').forEach(btn => btn.classList.remove('active'));
+
+      const imgComp = document.getElementById('outCompressed');
+      const imgOver = document.getElementById('outOverlay');
+      const imgEner = document.getElementById('outEnergy');
+
+      imgComp.style.display = 'none';
+      imgOver.style.display = 'none';
+      imgEner.style.display = 'none';
+
+      if (view === 'compressed') {
+        document.querySelectorAll('.switch-btn')[0].classList.add('active');
+        imgComp.style.display = 'block';
+      } else if (view === 'overlay') {
+        document.querySelectorAll('.switch-btn')[1].classList.add('active');
+        imgOver.style.display = 'block';
+      } else if (view === 'energy') {
+        document.querySelectorAll('.switch-btn')[2].classList.add('active');
+        imgEner.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
