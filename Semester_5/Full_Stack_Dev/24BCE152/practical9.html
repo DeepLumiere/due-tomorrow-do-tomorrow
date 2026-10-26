@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>SatSys - Role-Based Satellite Management System</title>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800 p-4 md:p-8">
+
+<div class="max-w-7xl mx-auto w-full">
+    <h2 class="text-3xl md:text-5xl font-bold text-slate-800 mb-2">Sat Mgmt System</h2>
+    <p class="text-lg md:text-xl text-gray-600 mb-6">Role-Based Access Control (RBAC): Viewer & Editor Roles</p>
+
+    <!-- Role Switcher & Access Control Bar -->
+    <div class="bg-white p-4 md:p-6 border border-gray-200 rounded-lg mb-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <span class="text-sm font-semibold text-gray-500 uppercase tracking-wide">Current Role:</span>
+            <span id="roleBadge" class="text-sm px-3 py-1 rounded-full font-bold uppercase bg-blue-100 text-blue-800 border border-blue-200">
+                EDITOR (Full Access)
+            </span>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-600 font-medium mr-1">Switch:</span>
+            <button id="btnViewer" onclick="setRole('viewer')" class="px-4 py-2 rounded font-medium text-sm transition-colors bg-gray-200 hover:bg-gray-300 text-gray-800">
+                Viewer (Read-Only)
+            </button>
+            <button id="btnEditor" onclick="setRole('editor')" class="px-4 py-2 rounded font-medium text-sm transition-colors bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                Editor (Full Control)
+            </button>
+        </div>
+    </div>
+
+    <!-- Geolocation Section -->
+    <div class="bg-white p-4 md:p-6 border border-gray-200 rounded-lg mb-6 shadow-sm flex flex-col sm:flex-row items-center gap-4">
+        <button class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 md:py-3 rounded font-medium transition-colors w-full sm:w-auto" onclick="getCoordinates()">
+            Get My Location
+        </button>
+        <span id="geoDisplay" class="text-gray-700 text-lg">Location: Not fetched yet</span>
+    </div>
+
+    <!-- Banner -->
+    <picture>
+        <source media="(min-width: 600px)" srcset="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1472&auto=format&fit=crop">
+        <img class="w-full h-48 md:h-96 object-cover rounded-lg mb-6 shadow-sm" src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1472&auto=format&fit=crop" alt="Deep Satellite Image">
+    </picture>
+
+    <!-- Form Section (Role-Gated for Editor) -->
+    <div id="formSection" class="bg-white p-4 md:p-6 border border-gray-200 rounded-lg mb-6 shadow-sm flex flex-col sm:flex-row flex-wrap gap-3">
+        <input type="text" id="satInput" placeholder="Name" class="flex-1 min-w-[200px] border border-gray-300 rounded p-2 md:p-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <input type="text" id="orgInput" placeholder="Organization" class="flex-1 min-w-[200px] border border-gray-300 rounded p-2 md:p-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <input type="date" id="dateInput" class="flex-1 min-w-[150px] border border-gray-300 rounded p-2 md:p-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <select id="statusInput" class="flex-1 min-w-[150px] border border-gray-300 rounded p-2 md:p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
+            <option value="Pending">Pending</option>
+            <option value="In Progress">Progress</option>
+            <option value="Done">Done</option>
+            <option value="Missed">Missed</option>
+            <option value="Crashed">Crashed</option>
+        </select>
+        <button id="addSatBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 md:py-3 rounded font-medium transition-colors w-full sm:w-auto" onclick="addSatellite()">
+            Add Satellite
+        </button>
+    </div>
+
+    <!-- Actions Section -->
+    <div class="bg-white p-4 md:p-6 border border-gray-200 rounded-lg mb-6 shadow-sm flex flex-col sm:flex-row flex-wrap gap-3 items-center">
+        <input type="text" id="searchInput" placeholder="Search Here" onkeyup="searchSatellites()" class="flex-1 w-full sm:w-auto border border-gray-300 rounded p-2 md:p-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 md:py-3 rounded font-medium transition-colors w-full sm:w-auto" onclick="downloadJSON()">
+            Download JSON
+        </button>
+        <input type="file" id="fileInput" onchange="uploadJSON(event)" class="w-full sm:w-auto border border-gray-300 rounded p-2 md:p-3 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+    </div>
+
+    <!-- Drag & Drop Zone -->
+    <div id="dropZone" class="border-2 border-dashed border-blue-400 bg-slate-50 text-gray-500 p-6 md:p-10 text-center rounded-lg text-lg mb-6 transition-colors duration-200" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        Drag & Drop your satellite JSON file here to upload (Editor role required)
+    </div>
+
+    <!-- Table Section -->
+    <div class="w-full overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+        <table class="w-full min-w-[600px] border-collapse text-left">
+            <thead class="bg-gray-100 border-b border-gray-300">
+            <tr>
+                <th class="p-3 md:p-4 font-semibold text-gray-700 border-r border-gray-200">ID</th>
+                <th class="p-3 md:p-4 font-semibold text-gray-700 border-r border-gray-200">Name</th>
+                <th class="p-3 md:p-4 font-semibold text-gray-700 border-r border-gray-200">Org</th>
+                <th class="p-3 md:p-4 font-semibold text-gray-700 border-r border-gray-200">Launch Date</th>
+                <th class="p-3 md:p-4 font-semibold text-gray-700 border-r border-gray-200">Status</th>
+                <th class="p-3 md:p-4 font-semibold text-gray-700">Action</th>
+            </tr>
+            </thead>
+            <tbody id="satTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:3000/api/satellites";
+    let satellites = [];
+    let currentRole = "editor"; // Default role: 'editor' or 'viewer'
+
+    // ==========================================
+    // 1. ROLE-BASED ACCESS CONTROL (RBAC) LOGIC
+    // ==========================================
+    function setRole(role) {
+        currentRole = role;
+        const badge = document.getElementById("roleBadge");
+        const btnViewer = document.getElementById("btnViewer");
+        const btnEditor = document.getElementById("btnEditor");
+        const addBtn = document.getElementById("addSatBtn");
+        const formSection = document.getElementById("formSection");
+
+        if (currentRole === "editor") {
+            badge.innerText = "EDITOR (Full Access)";
+            badge.className = "text-sm px-3 py-1 rounded-full font-bold uppercase bg-blue-100 text-blue-800 border border-blue-200";
+            btnEditor.className = "px-4 py-2 rounded font-medium text-sm transition-colors bg-blue-600 hover:bg-blue-700 text-white shadow-sm";
+            btnViewer.className = "px-4 py-2 rounded font-medium text-sm transition-colors bg-gray-200 hover:bg-gray-300 text-gray-800";
+            
+            formSection.classList.remove("opacity-60");
+            addBtn.disabled = false;
+            addBtn.className = "bg-green-500 hover:bg-green-600 text-white px-4 py-2 md:py-3 rounded font-medium transition-colors w-full sm:w-auto cursor-pointer";
+        } else {
+            badge.innerText = "VIEWER (Read-Only)";
+            badge.className = "text-sm px-3 py-1 rounded-full font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-200";
+            btnViewer.className = "px-4 py-2 rounded font-medium text-sm transition-colors bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm";
+            btnEditor.className = "px-4 py-2 rounded font-medium text-sm transition-colors bg-gray-200 hover:bg-gray-300 text-gray-800";
+
+            formSection.classList.add("opacity-60");
+            addBtn.disabled = true;
+            addBtn.className = "bg-gray-400 text-white px-4 py-2 md:py-3 rounded font-medium cursor-not-allowed w-full sm:w-auto";
+        }
+
+        renderTable();
+    }
+
+    function checkPermission(action) {
+        if (currentRole === "editor") {
+            return true;
+        } else {
+            alert(`Access Denied (403 Forbidden): 'Viewer' role is read-only. You cannot ${action} satellites.`);
+            return false;
+        }
+    }
+
+    // ==========================================
+    // 2. GEOLOCATION & DRAG & DROP
+    // ==========================================
+    function getCoordinates() {
+        let display = document.getElementById("geoDisplay");
+        if (navigator.geolocation) {
+            display.innerText = "Locating...";
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    let lat = position.coords.latitude.toFixed(4);
+                    let lon = position.coords.longitude.toFixed(4);
+                    display.innerText = `Latitude: ${lat}, Longitude: ${lon}`;
+                },
+                function (error) {
+                    display.innerText = "Error: Unable to retrieve your location.";
+                }
+            );
+        } else {
+            display.innerText = "Geolocation is not supported by your browser.";
+        }
+    }
+
+    let dragIndex;
+
+    function dragStart(event, index) {
+        if (!checkPermission("reorder")) {
+            event.preventDefault();
+            return;
+        }
+        dragIndex = index;
+        event.dataTransfer.setData("text/plain", index);
+    }
+
+    function dragOver(event) {
+        event.preventDefault();
+    }
+
+    function dragDrop(event, index) {
+        event.preventDefault();
+        if (currentRole !== "editor") return;
+        let draggedItem = satellites.splice(dragIndex, 1)[0];
+        satellites.splice(index, 0, draggedItem);
+        renderTable();
+    }
+
+    function handleDragOver(event) {
+        event.preventDefault();
+        document.getElementById("dropZone").classList.add("bg-blue-100", "border-blue-600");
+        document.getElementById("dropZone").classList.remove("bg-slate-50", "border-blue-400");
+    }
+
+    function handleDragLeave(event) {
+        event.preventDefault();
+        document.getElementById("dropZone").classList.add("bg-slate-50", "border-blue-400");
+        document.getElementById("dropZone").classList.remove("bg-blue-100", "border-blue-600");
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+        document.getElementById("dropZone").classList.add("bg-slate-50", "border-blue-400");
+        document.getElementById("dropZone").classList.remove("bg-blue-100", "border-blue-600");
+
+        if (!checkPermission("import")) return;
+
+        let files = event.dataTransfer.files;
+        if (files.length > 0) {
+            let reader = new FileReader();
+            reader.onload = async function (e) {
+                try {
+                    let list = JSON.parse(e.target.result);
+                    for (let sat of list) {
+                        await fetch(API_URL, {
+                            method: "POST",
+                            headers: { 
+                                "Content-Type": "application/json",
+                                "x-user-role": currentRole
+                            },
+                            body: JSON.stringify(sat)
+                        });
+                    }
+                    showSatellites();
+                    alert("Satellites successfully imported via Drag & Drop!");
+                } catch (err) {
+                    alert("Invalid JSON file format.");
+                }
+            };
+            reader.readAsText(files[0]);
+        }
+    }
+
+    function getStatusTailwindClass(status) {
+        let baseClass = "p-1 md:p-2 rounded font-medium border border-transparent outline-none cursor-pointer w-full ";
+        if (status === "Done") return baseClass + "bg-green-100 text-green-800";
+        if (status === "In Progress") return baseClass + "bg-blue-100 text-blue-800";
+        if (status === "Pending") return baseClass + "bg-yellow-100 text-yellow-800";
+        if (status === "Missed") return baseClass + "bg-gray-200 text-gray-800";
+        if (status === "Crashed") return baseClass + "bg-red-100 text-red-800";
+        return baseClass + "bg-white text-gray-800";
+    }
+
+    // ==========================================
+    // 3. API OPERATIONS & TABLE RENDERING
+    // ==========================================
+    async function showSatellites() {
+        try {
+            let res = await fetch(API_URL);
+            let json = await res.json();
+            if (json.success) {
+                satellites = json.data;
+                renderTable();
+            }
+        } catch (err) {
+            // In-memory fallback if server is offline
+            if (satellites.length === 0) {
+                satellites = [
+                    { id: 1, name: "GoSa", org: "Deep", launchDate: "2026-05-10", status: "Done" },
+                    { id: 2, name: "MoSa", org: "Nirma", launchDate: "2026-08-15", status: "In Progress" },
+                    { id: 3, name: "DoSa", org: "Nasa", launchDate: "2026-12-01", status: "Pending" },
+                    { id: 4, name: "LoSa", org: "Isro", launchDate: "2026-11-20", status: "Crashed" }
+                ];
+            }
+            renderTable();
+        }
+    }
+
+    async function searchSatellites() {
+        let search = document.getElementById("searchInput").value.trim();
+        try {
+            let url = search ? `${API_URL}?search=${encodeURIComponent(search)}` : API_URL;
+            let res = await fetch(url);
+            let json = await res.json();
+            if (json.success) {
+                satellites = json.data;
+                renderTable();
+            }
+        } catch (err) {
+            let filtered = satellites.filter(s =>
+                s.name.toLowerCase().includes(search.toLowerCase()) ||
+                s.org.toLowerCase().includes(search.toLowerCase())
+            );
+            satellites = filtered;
+            renderTable();
+        }
+    }
+
+    function renderTable() {
+        let tbody = document.getElementById("satTable");
+        tbody.innerHTML = "";
+
+        if (satellites.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">No satellites found</td></tr>`;
+            return;
+        }
+
+        const isEditor = (currentRole === "editor");
+
+        satellites.forEach((sat, index) => {
+            let statusClass = getStatusTailwindClass(sat.status);
+            
+            // Status element (editable dropdown for Editor, read-only for Viewer)
+            let statusHtml = "";
+            if (isEditor) {
+                statusHtml = `
+                    <select class="${statusClass}" onchange="changeStatus(${sat.id}, this.value)">
+                        <option value="Pending" ${sat.status === "Pending" ? "selected" : ""}>Pending</option>
+                        <option value="In Progress" ${sat.status === "In Progress" ? "selected" : ""}>In Progress</option>
+                        <option value="Done" ${sat.status === "Done" ? "selected" : ""}>Done</option>
+                        <option value="Missed" ${sat.status === "Missed" ? "selected" : ""}>Missed</option>
+                        <option value="Crashed" ${sat.status === "Crashed" ? "selected" : ""}>Crashed</option>
+                    </select>
+                `;
+            } else {
+                statusHtml = `
+                    <span class="inline-block px-3 py-1.5 rounded font-medium text-xs md:text-sm ${statusClass} cursor-not-allowed">
+                        ${sat.status} (Read-Only)
+                    </span>
+                `;
+            }
+
+            // Action button (Delete for Editor, Locked for Viewer)
+            let actionHtml = "";
+            if (isEditor) {
+                actionHtml = `
+                    <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 md:px-4 md:py-2 rounded font-medium transition-colors w-full" onclick="deleteSat(${sat.id})">
+                        Delete
+                    </button>
+                `;
+            } else {
+                actionHtml = `
+                    <button class="bg-gray-300 text-gray-500 px-3 py-1 md:px-4 md:py-2 rounded font-medium w-full cursor-not-allowed" onclick="checkPermission('delete')">
+                        Locked
+                    </button>
+                `;
+            }
+
+            tbody.innerHTML += `
+                <tr class="border-b border-gray-200 hover:bg-gray-50 ${isEditor ? 'cursor-move' : ''} transition-colors" draggable="${isEditor}" ondragstart="dragStart(event, ${index})" ondragover="dragOver(event)" ondrop="dragDrop(event, ${index})">
+                    <td class="p-3 md:p-4 border-r border-gray-200">${sat.id}</td>
+                    <td class="p-3 md:p-4 border-r border-gray-200 font-medium text-gray-900">${sat.name}</td>
+                    <td class="p-3 md:p-4 border-r border-gray-200">${sat.org || '-'}</td>
+                    <td class="p-3 md:p-4 border-r border-gray-200">${sat.launchDate || '-'}</td>
+                    <td class="p-3 md:p-4 border-r border-gray-200">${statusHtml}</td>
+                    <td class="p-3 md:p-4">${actionHtml}</td>
+                </tr>
+            `;
+        });
+    }
+
+    async function addSatellite() {
+        if (!checkPermission("add")) return;
+
+        let nameInput = document.getElementById("satInput");
+        let orgInput = document.getElementById("orgInput");
+        let dateInput = document.getElementById("dateInput");
+        let statusInput = document.getElementById("statusInput");
+
+        if (nameInput.value !== "") {
+            let newSat = {
+                name: nameInput.value,
+                org: orgInput.value || "Deep",
+                launchDate: dateInput.value || "2026-06-06",
+                status: statusInput.value
+            };
+
+            try {
+                let res = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "x-user-role": currentRole
+                    },
+                    body: JSON.stringify(newSat)
+                });
+                let json = await res.json();
+                if (json.success) {
+                    nameInput.value = "";
+                    orgInput.value = "";
+                    dateInput.value = "";
+                    statusInput.value = "Done";
+                    showSatellites();
+                } else {
+                    alert(json.error || "Failed to add satellite.");
+                }
+            } catch (err) {
+                // In-memory fallback
+                newSat.id = Date.now() % 10000;
+                satellites.push(newSat);
+                nameInput.value = "";
+                orgInput.value = "";
+                dateInput.value = "";
+                renderTable();
+            }
+        }
+    }
+
+    async function changeStatus(id, newStatus) {
+        if (!checkPermission("update")) return;
+
+        try {
+            let res = await fetch(`${API_URL}/${id}`, {
+                method: "PUT",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "x-user-role": currentRole
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            let json = await res.json();
+            if (json.success) {
+                showSatellites();
+            } else {
+                alert(json.error || "Failed to update status.");
+            }
+        } catch (err) {
+            let target = satellites.find(s => s.id === id);
+            if (target) target.status = newStatus;
+            renderTable();
+        }
+    }
+
+    async function deleteSat(id) {
+        if (!checkPermission("delete")) return;
+
+        try {
+            let res = await fetch(`${API_URL}/${id}`, {
+                method: "DELETE",
+                headers: { "x-user-role": currentRole }
+            });
+            let json = await res.json();
+            if (json.success) {
+                showSatellites();
+            } else {
+                alert(json.error || "Failed to delete satellite.");
+            }
+        } catch (err) {
+            satellites = satellites.filter(s => s.id !== id);
+            renderTable();
+        }
+    }
+
+    function downloadJSON() {
+        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(satellites, null, 2));
+        let a = document.createElement("a");
+        a.href = dataStr;
+        a.download = `sat_${currentRole}.json`;
+        a.click();
+    }
+
+    function uploadJSON(event) {
+        if (!checkPermission("upload")) {
+            event.target.value = "";
+            return;
+        }
+
+        let reader = new FileReader();
+        reader.onload = async function (e) {
+            try {
+                let list = JSON.parse(e.target.result);
+                for (let sat of list) {
+                    await fetch(API_URL, {
+                        method: "POST",
+                        headers: { 
+                            "Content-Type": "application/json",
+                            "x-user-role": currentRole
+                        },
+                        body: JSON.stringify(sat)
+                    });
+                }
+                showSatellites();
+                alert("Satellites successfully imported!");
+            } catch (err) {
+                alert("Invalid JSON file format.");
+            }
+        };
+        reader.readAsText(event.target.files[0]);
+    }
+
+    // Initialize UI and fetch satellites
+    setRole("editor");
+    showSatellites();
+</script>
+</body>
+
+</html>

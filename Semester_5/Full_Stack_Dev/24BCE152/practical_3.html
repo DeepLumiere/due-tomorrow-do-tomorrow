@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>SatSys - Satellite Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2vw;
+            background-color: #fafafa;
+        }
+
+        .container {
+            width: 90vw;
+            max-width: 90vw;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-size: 4vw;
+            color: #2c3e50;
+            margin-bottom: 0.5vw;
+        }
+
+        .subtitle {
+            font-size: 1.5vw;
+            color: #666;
+            margin-top: 0;
+            margin-bottom: 1.5vw;
+        }
+
+        .banner-img {
+            width: 90vw;
+            max-width: 90vw;
+            height: 45vw;
+            object-fit: fill;
+            border-radius: 0.5vw;
+            margin-bottom: 1.5vw;
+            align-content: center;
+        }
+
+        .form-section, .actions-section {
+            background-color: #fff;
+            padding: 1.5vw;
+            border: 0.1vw solid #ddd;
+            border-radius: 0.5vw;
+            margin-bottom: 1.5vw;
+        }
+
+        input, select, button {
+            padding: 1vw;
+            margin: 0.5vw;
+            font-size: 1.2vw;
+            box-sizing: border-box;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 90vw;
+            max-width: 90vw;
+            margin-top: 1vw;
+            background-color: #fff;
+        }
+
+        th, td {
+            border: 0.1vw solid #ccc;
+            padding: 1vw;
+            font-size: 1.2vw;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .del-btn:hover { background-color: red; color: white; border-color: red; cursor: pointer; }
+        .add-btn:hover { background-color: green; color: white; border-color: green; cursor: pointer; }
+        .dwd-btn:hover { background-color: blue; color: white; border-color: blue; cursor: pointer; }
+
+        .status-done { background-color: #d4edda; color: #155724; }
+        .status-inprogress { background-color: #cce5ff; color: #004085; }
+        .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-missed { background-color: #e2e3e5; color: #383d41; }
+        .status-crashed { background-color: #f8d7da; color: #721c24; }
+
+        @media (max-width: 600px) {
+            body {
+                margin: 2vw;
+            }
+
+            .page-title {
+                font-size: 6vw;
+            }
+
+            .subtitle {
+                font-size: 2.5vw;
+            }
+
+            input, select, button {
+                width: 100%;
+                font-size: 3vw;
+                padding: 2vw;
+                margin: 1vw 0;
+            }
+
+            th, td {
+                font-size: 2.5vw;
+                padding: 2vw;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2 class="page-title">Sat Mgmt System</h2>
+    <p class="subtitle">Responsive layout sized completely using vw units</p>
+
+    <picture>
+        <source media="(min-width: 600vw)" srcset="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D">
+        <img class="banner-img" src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Deep Satellite Image">
+    </picture>
+
+    <div class="form-section">
+        <input type="text" id="satInput" placeholder="Name">
+        <input type="text" id="orgInput" placeholder="Organization">
+        <input type="date" id="dateInput">
+        <select id="statusInput">
+            <option value="Pending">Pending</option>
+            <option value="In Progress">Progress</option>
+            <option value="Done">Done</option>
+            <option value="Missed">Missed</option>
+            <option value="Crashed">Crashed</option>
+        </select>
+        <button class="add-btn" onclick="addSatellite()">Add Satellite</button>
+    </div>
+
+    <div class="actions-section">
+        <input type="text" id="searchInput" placeholder="Search Here" onkeyup="showSatellites()">
+        <button class="dwd-btn" onclick="downloadJSON()">Download JSON</button>
+        <input type="file" id="fileInput" onchange="uploadJSON(event)">
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Org</th>
+                <th>Launch Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody id="satTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let satellites = [
+        { id: 1, name: "GoSa", org: "Deep", launchDate: "2026-05-10", status: "Done" },
+        { id: 2, name: "MoSa", org: "Nirma", launchDate: "2026-08-15", status: "In Progress" },
+        { id: 3, name: "DoSa", org: "Nasa", launchDate: "2026-12-01", status: "Pending" },
+        { id: 4, name: "LoSa", org: "Isro", launchDate: "2026-11-20", status: "Crashed" }
+    ];
+
+    function getStatusClass(status) {
+        if (status === "Done") return "status-done";
+        if (status === "In Progress") return "status-inprogress";
+        if (status === "Pending") return "status-pending";
+        if (status === "Missed") return "status-missed";
+        if (status === "Crashed") return "status-crashed";
+        return "";
+    }
+
+    function showSatellites() {
+        let tbody = document.getElementById("satTable");
+        tbody.innerHTML = "";
+
+        let search = document.getElementById("searchInput").value.toLowerCase();
+
+        satellites.forEach((sat, index) => {
+            let nameMatch = sat.name.toLowerCase().includes(search);
+            let orgMatch = (sat.org || "").toLowerCase().includes(search);
+            let statusMatch = (sat.status || "").toLowerCase().includes(search);
+
+            if (nameMatch || orgMatch || statusMatch) {
+                let statusClass = getStatusClass(sat.status);
+                tbody.innerHTML += `
+                        <tr>
+                            <td>${sat.id}</td>
+                            <td>${sat.name}</td>
+                            <td>${sat.org || '-'}</td>
+                            <td>${sat.launchDate || '-'}</td>
+                            <td>
+                                <select class="${statusClass}" onchange="changeStatus(${index}, this.value)">
+                                    <option value="Pending" ${sat.status === "Pending" ? "selected" : ""}>Pending</option>
+                                    <option value="In Progress" ${sat.status === "In Progress" ? "selected" : ""}>In Progress</option>
+                                    <option value="Done" ${sat.status === "Done" ? "selected" : ""}>Done</option>
+                                    <option value="Missed" ${sat.status === "Missed" ? "selected" : ""}>Missed</option>
+                                    <option value="Crashed" ${sat.status === "Crashed" ? "selected" : ""}>Crashed</option>
+                                </select>
+                            </td>
+                            <td><button class="del-btn" onclick="deleteSat(${index})">Delete</button></td>
+                        </tr>
+                    `;
+            }
+        });
+    }
+
+    function addSatellite() {
+        let nameInput = document.getElementById("satInput");
+        let orgInput = document.getElementById("orgInput");
+        let dateInput = document.getElementById("dateInput");
+        let statusInput = document.getElementById("statusInput");
+
+        if (nameInput.value !== "") {
+            let newId = satellites.length > 0 ? satellites[satellites.length - 1].id + 1 : 1;
+            satellites.push({
+                id: newId,
+                name: nameInput.value,
+                org: orgInput.value || "Deep",
+                launchDate: dateInput.value || "2026-06-06",
+                status: statusInput.value
+            });
+
+            nameInput.value = "";
+            orgInput.value = "";
+            dateInput.value = "";
+            statusInput.value = "Done";
+            showSatellites();
+        }
+    }
+
+    function changeStatus(index, newStatus) {
+        satellites[index].status = newStatus;
+        showSatellites();
+    }
+
+    function deleteSat(index) {
+        satellites.splice(index, 1);
+        showSatellites();
+    }
+
+    function downloadJSON() {
+        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(satellites, null, 2));
+        let a = document.createElement("a");
+        a.href = dataStr;
+        a.download = "sat.json";
+        a.click();
+    }
+
+    function uploadJSON(event) {
+        let reader = new FileReader();
+        reader.onload = function (e) {
+            satellites = JSON.parse(e.target.result);
+            showSatellites();
+        };
+        reader.readAsText(event.target.files[0]);
+    }
+
+    showSatellites();
+</script>
+</body>
+
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>SatSys - Satellite Management System</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .drop-zone {
+            border: 2px dashed #0d6efd;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .drop-zone.dragover {
+            background-color: #e9ecef;
+            border-color: #0a58ca;
+        }
+
+        .banner-img {
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        tbody tr {
+            cursor: move;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+<div class="container py-4">
+    <div class="text-center mb-4">
+        <h2 class="display-5 fw-bold text-primary">Sat Mgmt System</h2>
+        <p class="lead text-secondary">Responsive layout with Geolocation, Local Storage, and Drag & Drop</p>
+    </div>
+
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-body d-flex flex-column flex-md-row align-items-center justify-content-center gap-3 bg-white rounded">
+            <button class="btn btn-warning shadow-sm fw-bold" onclick="getCoordinates()">
+                Get My Location
+            </button>
+            <span id="geoDisplay" class="text-muted fw-medium fs-5">Location: Not fetched yet</span>
+        </div>
+    </div>
+
+    <img class="img-fluid rounded shadow-sm mb-4 w-100 banner-img"
+         src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1472&auto=format&fit=crop"
+         alt="Deep Satellite Image">
+
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <input type="text" id="satInput" class="form-control" placeholder="Satellite Name">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" id="orgInput" class="form-control" placeholder="Organization">
+                </div>
+                <div class="col-md-2">
+                    <input type="date" id="dateInput" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <select id="statusInput" class="form-select">
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Done">Done</option>
+                        <option value="Missed">Missed</option>
+                        <option value="Crashed">Crashed</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-success w-100 fw-bold" onclick="addSatellite()">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4 g-2">
+        <div class="col-md-6">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search Satellites..." onkeyup="showSatellites()">
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100 fw-bold" onclick="downloadJSON()">Download JSON</button>
+        </div>
+        <div class="col-md-3">
+            <input type="file" id="fileInput" class="form-control" onchange="uploadJSON(event)">
+        </div>
+    </div>
+
+    <div id="dropZone" class="drop-zone p-5 text-center rounded mb-4 shadow-sm" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <h5 class="text-secondary m-0">Drag & Drop your satellite JSON file here to upload</h5>
+    </div>
+
+    <div class="table-responsive bg-white shadow-sm rounded border-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Org</th>
+                <th>Launch Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody id="satTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let satellites = JSON.parse(localStorage.getItem("satellites")) || [
+        { id: 1, name: "GoSa", org: "Deep", launchDate: "2026-05-10", status: "Done" },
+        { id: 2, name: "MoSa", org: "Nirma", launchDate: "2026-08-15", status: "In Progress" },
+        { id: 3, name: "DoSa", org: "Nasa", launchDate: "2026-12-01", status: "Pending" },
+        { id: 4, name: "LoSa", org: "Isro", launchDate: "2026-11-20", status: "Crashed" }
+    ];
+
+    function saveToLocalStorage() {
+        localStorage.setItem("satellites", JSON.stringify(satellites));
+    }
+
+    function getCoordinates() {
+        let display = document.getElementById("geoDisplay");
+        if (navigator.geolocation) {
+            display.innerText = "Locating...";
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    let lat = position.coords.latitude.toFixed(4);
+                    let lon = position.coords.longitude.toFixed(4);
+                    display.innerHTML = `<span class="text-success">Latitude: ${lat}, Longitude: ${lon}</span>`;
+                },
+                function () {
+                    display.innerHTML = `<span class="text-danger">Error: Unable to retrieve location.</span>`;
+                }
+            );
+        } else {
+            display.innerText = "Geolocation not supported.";
+        }
+    }
+
+    let dragIndex;
+
+    function dragStart(event, index) {
+        dragIndex = index;
+        event.dataTransfer.setData("text/plain", index);
+    }
+
+    function dragOver(event) {
+        event.preventDefault();
+    }
+
+    function dragDrop(event, index) {
+        event.preventDefault();
+        let draggedItem = satellites.splice(dragIndex, 1)[0];
+        satellites.splice(index, 0, draggedItem);
+        saveToLocalStorage();
+        showSatellites();
+    }
+
+    function handleDragOver(event) {
+        event.preventDefault();
+        document.getElementById("dropZone").classList.add("dragover");
+    }
+
+    function handleDragLeave(event) {
+        event.preventDefault();
+        document.getElementById("dropZone").classList.remove("dragover");
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+        document.getElementById("dropZone").classList.remove("dragover");
+        let files = event.dataTransfer.files;
+        if (files.length > 0) {
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    satellites = JSON.parse(e.target.result);
+                    saveToLocalStorage();
+                    showSatellites();
+                    alert("Satellites successfully imported via Drag & Drop!");
+                } catch (err) {
+                    alert("Invalid JSON file format.");
+                }
+            };
+            reader.readAsText(files[0]);
+        }
+    }
+
+    function getStatusStyle(status) {
+        if (status === "Done") return "bg-success text-white";
+        if (status === "In Progress") return "bg-primary text-white";
+        if (status === "Pending") return "bg-warning text-dark";
+        if (status === "Missed") return "bg-secondary text-white";
+        if (status === "Crashed") return "bg-danger text-white";
+        return "";
+    }
+
+    function showSatellites() {
+        let tbody = document.getElementById("satTable");
+        tbody.innerHTML = "";
+        let search = document.getElementById("searchInput").value.toLowerCase();
+
+        satellites.forEach((sat, index) => {
+            let nameMatch = sat.name.toLowerCase().includes(search);
+            let orgMatch = (sat.org || "").toLowerCase().includes(search);
+            let statusMatch = (sat.status || "").toLowerCase().includes(search);
+
+            if (nameMatch || orgMatch || statusMatch) {
+                let statusStyle = getStatusStyle(sat.status);
+                tbody.innerHTML += `
+                        <tr draggable="true" ondragstart="dragStart(event, ${index})" ondragover="dragOver(event)" ondrop="dragDrop(event, ${index})">
+                            <td class="fw-bold">${sat.id}</td>
+                            <td>${sat.name}</td>
+                            <td>${sat.org || '-'}</td>
+                            <td>${sat.launchDate || '-'}</td>
+                            <td>
+                                <select class="form-select form-select-sm shadow-none ${statusStyle}" onchange="changeStatus(${index}, this.value)">
+                                    <option class="bg-white text-dark" value="Pending" ${sat.status === "Pending" ? "selected" : ""}>Pending</option>
+                                    <option class="bg-white text-dark" value="In Progress" ${sat.status === "In Progress" ? "selected" : ""}>In Progress</option>
+                                    <option class="bg-white text-dark" value="Done" ${sat.status === "Done" ? "selected" : ""}>Done</option>
+                                    <option class="bg-white text-dark" value="Missed" ${sat.status === "Missed" ? "selected" : ""}>Missed</option>
+                                    <option class="bg-white text-dark" value="Crashed" ${sat.status === "Crashed" ? "selected" : ""}>Crashed</option>
+                                </select>
+                            </td>
+                            <td><button class="btn btn-sm btn-danger fw-bold" onclick="deleteSat(${index})">Delete</button></td>
+                        </tr>
+                    `;
+            }
+        });
+    }
+
+    function addSatellite() {
+        let nameInput = document.getElementById("satInput");
+        let orgInput = document.getElementById("orgInput");
+        let dateInput = document.getElementById("dateInput");
+        let statusInput = document.getElementById("statusInput");
+
+        if (nameInput.value !== "") {
+            let newId = satellites.length > 0 ? satellites[satellites.length - 1].id + 1 : 1;
+            satellites.push({
+                id: newId,
+                name: nameInput.value,
+                org: orgInput.value || "Unknown",
+                launchDate: dateInput.value || "TBD",
+                status: statusInput.value
+            });
+
+            saveToLocalStorage();
+            nameInput.value = "";
+            orgInput.value = "";
+            dateInput.value = "";
+            statusInput.value = "Pending";
+            showSatellites();
+        }
+    }
+
+    function changeStatus(index, newStatus) {
+        satellites[index].status = newStatus;
+        saveToLocalStorage();
+        showSatellites();
+    }
+
+    function deleteSat(index) {
+        satellites.splice(index, 1);
+        saveToLocalStorage();
+        showSatellites();
+    }
+
+    function downloadJSON() {
+        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(satellites, null, 2));
+        let a = document.createElement("a");
+        a.href = dataStr;
+        a.download = "satellites.json";
+        a.click();
+    }
+
+    function uploadJSON(event) {
+        let reader = new FileReader();
+        reader.onload = function (e) {
+            satellites = JSON.parse(e.target.result);
+            saveToLocalStorage();
+            showSatellites();
+        };
+        if(event.target.files.length > 0) {
+            reader.readAsText(event.target.files[0]);
+        }
+    }
+
+    showSatellites();
+</script>
+</body>
+</html>

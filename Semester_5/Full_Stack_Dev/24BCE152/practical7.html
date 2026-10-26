@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <title>SatSys - Satellite Management System</title>
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800 p-4 md:p-8">
+
+<div id="app" class="max-w-7xl mx-auto w-full">
+    <h2 class="text-3xl md:text-5xl font-bold text-slate-800 mb-2">Sat Mgmt System</h2>
+    <p class="text-lg md:text-xl text-gray-600 mb-6">Responsive layout with Vue.js, Custom Directives, and Drag & Drop</p>
+
+    <!-- Geolocation Section -->
+    <div class="bg-white p-4 md:p-6 border border-gray-200 rounded-lg mb-6 shadow-sm flex flex-col sm:flex-row items-center gap-4">
+        <button class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 md:py-3 rounded font-medium transition-colors w-full sm:w-auto" @click="getCoordinates">
+            Get My Location
+        </button>
+        <span id="geoDisplay" class="text-gray-700 text-lg">{{ geoDisplay }}</span>
+    </div>
+
+    <!-- Banner -->
+    <picture>
+        <source media="(min-width: 600px)" srcset="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1472&auto=format&fit=crop">
+        <img class="w-full h-48 md:h-96 object-cover rounded-lg mb-6 shadow-sm" src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1472&auto=format&fit=crop" alt="Deep Satellite Image">
+    </picture>
+
+    <!-- Form Section -->
+    <div class="bg-white p-4 md:p-6 border border-gray-200 rounded-lg mb-6 shadow-sm flex flex-col sm:flex-row flex-wrap gap-3">
+        <input type="text" v-model="nameInput" placeholder="Name" class="flex-1 min-w-[200px] border border-gray-300 rounded p-2 md:p-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <input type="text" v-model="orgInput" placeholder="Organization" class="flex-1 min-w-[200px] border border-gray-300 rounded p-2 md:p-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <input type="date" v-model="dateInput" class="flex-1 min-w-[150px] border border-gray-300 rounded p-2 md:p-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <select v-model="statusInput" class="flex-1 min-w-[150px] border border-gray-300 rounded p-2 md:p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
+            <option value="Pending">Pending</option>
+            <option value="In Progress">Progress</option>
+            <option value="Done">Done</option>
+            <option value="Missed">Missed</option>
+            <option value="Crashed">Crashed</option>
+        </select>
+        <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 md:py-3 rounded font-medium transition-colors w-full sm:w-auto" @click="addSatellite">
+            Add Satellite
+        </button>
+    </div>
+
+    <!-- Actions Section -->
+    <div class="bg-white p-4 md:p-6 border border-gray-200 rounded-lg mb-6 shadow-sm flex flex-col sm:flex-row flex-wrap gap-3 items-center">
+        <input type="text" v-model="searchInput" placeholder="Search Here" class="flex-1 w-full sm:w-auto border border-gray-300 rounded p-2 md:p-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 md:py-3 rounded font-medium transition-colors w-full sm:w-auto" @click="downloadJSON">
+            Download JSON
+        </button>
+        <input type="file" @change="uploadJSON" class="w-full sm:w-auto border border-gray-300 rounded p-2 md:p-3 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+    </div>
+
+    <!-- Drag & Drop Zone -->
+    <div id="dropZone"
+         :class="['border-2 border-dashed p-6 md:p-10 text-center rounded-lg text-lg mb-6 transition-colors duration-200', isDragOver ? 'bg-blue-100 border-blue-600' : 'bg-slate-50 border-blue-400 text-gray-500']"
+         @dragover.prevent="isDragOver = true"
+         @dragleave.prevent="isDragOver = false"
+         @drop.prevent="handleDrop">
+        Drag & Drop your satellite JSON file here to upload
+    </div>
+
+    <div class="bg-white p-4 md:p-6 border border-gray-200 rounded-lg mb-6 shadow-sm">
+        <h3 class="text-xl font-bold text-gray-800 mb-3">Dynamic Satellite List</h3>
+        <ul v-dynamic-list="satellites" class="divide-y divide-gray-200"></ul>
+    </div>
+
+    <!-- Table Section -->
+    <div class="w-full overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+        <table class="w-full min-w-[600px] border-collapse text-left">
+            <thead class="bg-gray-100 border-b border-gray-300">
+            <tr>
+                <th class="p-3 md:p-4 font-semibold text-gray-700 border-r border-gray-200">ID</th>
+                <th class="p-3 md:p-4 font-semibold text-gray-700 border-r border-gray-200">Name</th>
+                <th class="p-3 md:p-4 font-semibold text-gray-700 border-r border-gray-200">Org</th>
+                <th class="p-3 md:p-4 font-semibold text-gray-700 border-r border-gray-200">Launch Date</th>
+                <th class="p-3 md:p-4 font-semibold text-gray-700 border-r border-gray-200">Status</th>
+                <th class="p-3 md:p-4 font-semibold text-gray-700">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="(sat, index) in filteredSatellites"
+                :key="sat.id"
+                class="border-b border-gray-200 hover:bg-gray-50 cursor-move transition-colors"
+                draggable="true"
+                @dragstart="dragStart($event, index)"
+                @dragover.prevent
+                @drop="dragDrop($event, index)">
+                <td class="p-3 md:p-4 border-r border-gray-200">{{ sat.id }}</td>
+                <!-- Custom Directive I: Transform text to uppercase when clicked -->
+                <td class="p-3 md:p-4 border-r border-gray-200 font-medium text-gray-900 cursor-pointer" v-uppercase>
+                    {{ sat.name }}
+                </td>
+                <td class="p-3 md:p-4 border-r border-gray-200">{{ sat.org || '-' }}</td>
+                <!-- Custom Directive III: Formats date in human-readable format -->
+                <td class="p-3 md:p-4 border-r border-gray-200" v-format-date="sat.launchDate">
+                    {{ sat.launchDate }}
+                </td>
+                <td class="p-3 md:p-4 border-r border-gray-200">
+                    <select :class="getStatusTailwindClass(sat.status)" v-model="sat.status" @change="saveToLocalStorage">
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Done">Done</option>
+                        <option value="Missed">Missed</option>
+                        <option value="Crashed">Crashed</option>
+                    </select>
+                </td>
+                <td class="p-3 md:p-4">
+                    <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 md:px-4 md:py-2 rounded font-medium transition-colors w-full" @click="deleteSat(index)">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const { createApp, ref, computed } = Vue;
+
+    const app = createApp({
+        setup() {
+            const satellites = ref(JSON.parse(localStorage.getItem("satellites")) || [
+                { id: 1, name: "GoSa", org: "Deep", launchDate: "2026-05-10", status: "Done" },
+                { id: 2, name: "MoSa", org: "Nirma", launchDate: "2026-08-15", status: "In Progress" },
+                { id: 3, name: "DoSa", org: "Nasa", launchDate: "2026-12-01", status: "Pending" },
+                { id: 4, name: "LoSa", org: "Isro", launchDate: "2026-11-20", status: "Crashed" }
+            ]);
+
+            const nameInput = ref("");
+            const orgInput = ref("");
+            const dateInput = ref("");
+            const statusInput = ref("Done");
+            const searchInput = ref("");
+            const geoDisplay = ref("Location: Not fetched yet");
+            const isDragOver = ref(false);
+
+            function saveToLocalStorage() {
+                localStorage.setItem("satellites", JSON.stringify(satellites.value));
+            }
+
+            const filteredSatellites = computed(() => {
+                const search = searchInput.value.toLowerCase();
+                return satellites.value.filter(sat => {
+                    const nameMatch = (sat.name || "").toLowerCase().includes(search);
+                    const orgMatch = (sat.org || "").toLowerCase().includes(search);
+                    const statusMatch = (sat.status || "").toLowerCase().includes(search);
+                    return nameMatch || orgMatch || statusMatch;
+                });
+            });
+
+            function getCoordinates() {
+                if (navigator.geolocation) {
+                    geoDisplay.value = "Locating...";
+                    navigator.geolocation.getCurrentPosition(
+                        function (position) {
+                            let lat = position.coords.latitude.toFixed(4);
+                            let lon = position.coords.longitude.toFixed(4);
+                            geoDisplay.value = `Latitude: ${lat}, Longitude: ${lon}`;
+                        },
+                        function (error) {
+                            geoDisplay.value = "Error: Unable to retrieve your location.";
+                        }
+                    );
+                } else {
+                    geoDisplay.value = "Geolocation is not supported by your browser.";
+                }
+            }
+
+            function addSatellite() {
+                if (nameInput.value.trim() !== "") {
+                    let newId = satellites.value.length > 0 ? satellites.value[satellites.value.length - 1].id + 1 : 1;
+                    satellites.value.push({
+                        id: newId,
+                        name: nameInput.value.trim(),
+                        org: orgInput.value.trim() || "Deep",
+                        launchDate: dateInput.value || "2026-06-06",
+                        status: statusInput.value
+                    });
+
+                    saveToLocalStorage();
+
+                    nameInput.value = "";
+                    orgInput.value = "";
+                    dateInput.value = "";
+                    statusInput.value = "Done";
+                }
+            }
+
+            function deleteSat(index) {
+                satellites.value.splice(index, 1);
+                saveToLocalStorage();
+            }
+
+            let dragIndex;
+            function dragStart(event, index) {
+                dragIndex = index;
+                event.dataTransfer.setData("text/plain", index);
+            }
+
+            function dragDrop(event, index) {
+                event.preventDefault();
+                let draggedItem = satellites.value.splice(dragIndex, 1)[0];
+                satellites.value.splice(index, 0, draggedItem);
+                saveToLocalStorage();
+            }
+
+            function handleDrop(event) {
+                isDragOver.value = false;
+                let files = event.dataTransfer.files;
+                if (files.length > 0) {
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        try {
+                            satellites.value = JSON.parse(e.target.result);
+                            saveToLocalStorage();
+                            alert("Satellites successfully imported via Drag & Drop!");
+                        } catch (err) {
+                            alert("Invalid JSON file format.");
+                        }
+                    };
+                    reader.readAsText(files[0]);
+                }
+            }
+
+            function downloadJSON() {
+                let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(satellites.value, null, 2));
+                let a = document.createElement("a");
+                a.href = dataStr;
+                a.download = "sat.json";
+                a.click();
+            }
+
+            function uploadJSON(event) {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        satellites.value = JSON.parse(e.target.result);
+                        saveToLocalStorage();
+                    } catch (err) {
+                        alert("Invalid JSON file format.");
+                    }
+                };
+                reader.readAsText(event.target.files[0]);
+            }
+
+            function getStatusTailwindClass(status) {
+                let baseClass = "p-1 md:p-2 rounded font-medium border border-transparent outline-none cursor-pointer w-full ";
+                if (status === "Done") return baseClass + "bg-green-100 text-green-800";
+                if (status === "In Progress") return baseClass + "bg-blue-100 text-blue-800";
+                if (status === "Pending") return baseClass + "bg-yellow-100 text-yellow-800";
+                if (status === "Missed") return baseClass + "bg-gray-200 text-gray-800";
+                if (status === "Crashed") return baseClass + "bg-red-100 text-red-800";
+                return baseClass + "bg-white text-gray-800";
+            }
+
+            return {
+                satellites,
+                nameInput,
+                orgInput,
+                dateInput,
+                statusInput,
+                searchInput,
+                geoDisplay,
+                isDragOver,
+                filteredSatellites,
+                getCoordinates,
+                addSatellite,
+                deleteSat,
+                dragStart,
+                dragDrop,
+                handleDrop,
+                downloadJSON,
+                uploadJSON,
+                getStatusTailwindClass,
+                saveToLocalStorage
+            };
+        }
+    });
+
+    // Directive I: Transform text to uppercase when clicked
+    app.directive("uppercase", {
+        mounted(el) {
+            el.addEventListener("click", () => {
+                if (el.innerText) {
+                    el.innerText = el.innerText.toUpperCase();
+                }
+            });
+        }
+    });
+
+    // Directive II: Creating a Dynamic List with Custom Directive
+    app.directive("dynamic-list", {
+        mounted(el, binding) {
+            renderList(el, binding.value);
+        },
+        updated(el, binding) {
+            renderList(el, binding.value);
+        }
+    });
+
+    function renderList(el, items) {
+        el.innerHTML = "";
+        if (!items || items.length === 0) {
+            el.innerHTML = `<li class="py-2 text-gray-400">No satellites in list</li>`;
+            return;
+        }
+        items.forEach((item) => {
+            const li = document.createElement("li");
+            li.className = "py-2 flex justify-between items-center text-sm";
+            li.innerHTML = `<span><strong>${item.name}</strong> (${item.org || "Deep"})</span> <span class="text-gray-500">${item.status}</span>`;
+            el.appendChild(li);
+        });
+    }
+
+    // Directive III: Formats and displays date in human-readable format
+    app.directive("format-date", {
+        mounted(el, binding) {
+            formatDate(el, binding.value);
+        },
+        updated(el, binding) {
+            formatDate(el, binding.value);
+        }
+    });
+
+    function formatDate(el, dateValue) {
+        if (!dateValue) return;
+        const d = new Date(dateValue);
+        if (!isNaN(d.getTime())) {
+            el.innerText = d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+        }
+    }
+
+    app.mount("#app");
+</script>
+</body>
+
+</html>
